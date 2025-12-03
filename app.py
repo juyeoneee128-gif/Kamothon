@@ -446,6 +446,8 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
+from gemini_analyzer import DEMO_MODE, get_demo_result
+
 if 'analysis_complete' not in st.session_state:
     st.session_state.analysis_complete = False
 if 'uploaded_image' not in st.session_state:
@@ -463,6 +465,10 @@ def get_mime_type(filename: str) -> str:
         'png': 'image/png'
     }
     return mime_types.get(ext, 'image/jpeg')
+
+if DEMO_MODE:
+    st.session_state.analysis_result = get_demo_result()
+    st.session_state.analysis_complete = True
 
 if not st.session_state.analysis_complete:
     uploaded_file = st.file_uploader(
