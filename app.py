@@ -12,228 +12,528 @@ st.set_page_config(
 
 st.markdown("""
 <style>
-    /* ===== KAKAO-INSPIRED DESIGN SYSTEM ===== */
+    /* ===== MODERN PREMIUM DESIGN SYSTEM ===== */
     
     /* Typography: Pretendard with Noto Sans KR fallback */
     @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css');
     @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap');
     
     :root {
-        /* Kakao Brand Colors */
-        --kakao-yellow: #FEE500;
-        --kakao-brown: #3C1E1E;
+        /* Neutral Background Palette */
+        --bg-page: #F9F9F9;
+        --bg-card: #FFFFFF;
+        --bg-subtle: #F4F4F5;
         
-        /* Background */
-        --bg-primary: #F7F7F7;
-        --bg-white: #FFFFFF;
+        /* Text Colors */
+        --text-primary: #18181B;
+        --text-secondary: #52525B;
+        --text-tertiary: #71717A;
+        --text-muted: #A1A1AA;
         
-        /* Text Neutrals */
-        --text-primary: #1A1A1A;
-        --text-secondary: #3C3C3C;
-        --text-tertiary: #707070;
-        --text-muted: #999999;
+        /* Brand Accent - Yellow for highlights only */
+        --accent-yellow: #FACC15;
+        --accent-yellow-hover: #EAB308;
         
-        /* Risk Color Tokens */
-        --color-danger: #E53935;
-        --color-danger-bg: #FFEBEE;
-        --color-warning: #FFB300;
-        --color-warning-bg: #FFF8E1;
-        --color-safe: #00A86B;
-        --color-safe-bg: #E8F5E9;
+        /* Risk Tokens */
+        --risk-high: #DC2626;
+        --risk-high-bg: #FEF2F2;
+        --risk-medium: #F59E0B;
+        --risk-medium-bg: #FFFBEB;
+        --risk-low: #10B981;
+        --risk-low-bg: #ECFDF5;
         
-        /* UI */
-        --radius-sm: 8px;
-        --radius-md: 12px;
-        --radius-lg: 16px;
-        --radius-xl: 24px;
-        --shadow-sm: 0 2px 8px rgba(0,0,0,0.06);
-        --shadow-md: 0 4px 16px rgba(0,0,0,0.08);
-        --shadow-lg: 0 8px 32px rgba(0,0,0,0.12);
+        /* UI Tokens */
+        --border-color: #E4E4E7;
+        --radius-sm: 6px;
+        --radius-md: 8px;
+        --radius-lg: 12px;
+        --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+        --shadow-md: 0 4px 12px rgba(0,0,0,0.05);
+        --shadow-lg: 0 12px 24px rgba(0,0,0,0.08);
         
         /* Animation */
-        --transition-fast: 150ms ease;
-        --transition-normal: 250ms ease;
+        --transition: 200ms ease;
     }
     
     * {
-        font-family: 'Pretendard', 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
+        font-family: 'Pretendard', 'Noto Sans KR', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
     }
     
-    .main {
-        background-color: var(--bg-primary);
-    }
-    .stApp {
-        background: var(--bg-primary);
+    .main, .stApp {
+        background: var(--bg-page);
     }
     
-    /* Brand Header - Kakao Yellow */
+    /* ===== HEADER - Clean & Minimal ===== */
     .brand-header {
-        background: var(--kakao-yellow);
-        padding: 1.5rem 2rem;
-        border-radius: var(--radius-lg);
-        margin-bottom: 1.5rem;
+        max-width: 720px;
+        margin: 0 auto 2rem auto;
+        padding: 2.5rem 1.5rem;
         text-align: center;
-        box-shadow: var(--shadow-md);
+    }
+    .brand-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 48px;
+        height: 48px;
+        background: var(--accent-yellow);
+        border-radius: var(--radius-md);
+        margin-bottom: 1rem;
+        font-size: 1.5rem;
     }
     .brand-title {
-        color: var(--kakao-brown);
-        font-size: 1.8rem;
+        color: var(--text-primary);
+        font-size: 1.75rem;
         font-weight: 700;
-        margin-bottom: 0.3rem;
+        letter-spacing: -0.02em;
+        margin-bottom: 0.5rem;
     }
     .brand-subtitle {
-        color: var(--text-secondary);
+        color: var(--text-tertiary);
         font-size: 1rem;
-        font-weight: 500;
+        font-weight: 400;
+        line-height: 1.5;
     }
     
-    /* Document Viewer */
-    .document-viewer {
-        background: var(--bg-white);
-        border: none;
+    /* ===== CARDS ===== */
+    .card {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
         border-radius: var(--radius-lg);
-        padding: 2rem;
-        font-size: 1rem;
-        line-height: 2;
-        white-space: pre-wrap;
-        box-shadow: var(--shadow-md);
-        max-width: 900px;
-        margin: 0 auto 2rem auto;
-    }
-    
-    /* Risk Legend - Pill style */
-    .risk-legend {
-        display: flex;
-        gap: 1rem;
-        margin-bottom: 1.5rem;
-        justify-content: center;
-        flex-wrap: wrap;
-        padding: 1rem 1.5rem;
-        background: var(--bg-white);
-        border-radius: var(--radius-xl);
-        max-width: 900px;
-        margin-left: auto;
-        margin-right: auto;
+        padding: 1.5rem;
         box-shadow: var(--shadow-sm);
     }
-    .legend-item {
+    
+    /* ===== SUMMARY SECTION ===== */
+    .summary-section {
+        max-width: 720px;
+        margin: 0 auto 1.5rem auto;
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-lg);
+        padding: 1.25rem 1.5rem;
+        box-shadow: var(--shadow-sm);
+    }
+    .summary-header {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 0.5rem;
+    }
+    .summary-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        background: var(--accent-yellow);
+        border-radius: var(--radius-sm);
+        font-size: 1rem;
+    }
+    .summary-title {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+    .summary-text {
+        font-size: 1rem;
+        color: var(--text-primary);
+        font-weight: 500;
+        line-height: 1.5;
+    }
+    
+    /* ===== MISSING CLAUSES ===== */
+    .missing-section {
+        max-width: 720px;
+        margin: 0 auto 1.5rem auto;
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-lg);
+        padding: 1.25rem 1.5rem;
+        box-shadow: var(--shadow-sm);
+    }
+    .missing-header {
         display: flex;
         align-items: center;
         gap: 0.5rem;
-        font-size: 0.85rem;
-        font-weight: 500;
-        color: var(--text-secondary);
-        padding: 0.5rem 1rem;
-        border-radius: var(--radius-xl);
-        background: var(--bg-primary);
+        margin-bottom: 1rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 1px solid var(--border-color);
     }
-    .legend-dot {
-        width: 12px;
-        height: 12px;
-        border-radius: 50%;
-    }
-    .legend-dot.high { background: var(--color-danger); }
-    .legend-dot.medium { background: var(--color-warning); }
-    .legend-dot.low { background: var(--color-safe); }
-    
-    /* Missing Clauses Section */
-    .missing-section {
-        background: var(--color-warning-bg);
-        border-radius: var(--radius-lg);
-        padding: 1.25rem 1.5rem;
-        margin-bottom: 1.5rem;
-        border-left: 4px solid var(--color-warning);
-        max-width: 900px;
-        margin-left: auto;
-        margin-right: auto;
-        box-shadow: var(--shadow-sm);
+    .missing-icon {
+        color: var(--risk-medium);
+        font-size: 1.1rem;
     }
     .missing-title {
-        font-weight: 700;
+        font-size: 0.9rem;
+        font-weight: 600;
         color: var(--text-primary);
-        margin-bottom: 0.75rem;
-        font-size: 1rem;
+    }
+    .missing-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
     }
     .missing-item {
         display: flex;
         align-items: flex-start;
         gap: 0.5rem;
-        padding: 0.4rem 0;
+        font-size: 0.875rem;
         color: var(--text-secondary);
-        font-size: 0.9rem;
+        line-height: 1.5;
+    }
+    .missing-item::before {
+        content: '';
+        width: 6px;
+        height: 6px;
+        background: var(--risk-medium);
+        border-radius: 50%;
+        margin-top: 0.5rem;
+        flex-shrink: 0;
     }
     
-    /* Summary Banner - Kakao Yellow accent */
-    .summary-banner {
-        background: var(--kakao-yellow);
-        color: var(--kakao-brown);
-        padding: 1.25rem 1.5rem;
-        border-radius: var(--radius-lg);
-        margin-bottom: 1.5rem;
-        text-align: center;
-        max-width: 900px;
-        margin-left: auto;
-        margin-right: auto;
-        font-weight: 600;
-        box-shadow: var(--shadow-md);
+    /* ===== RISK LEGEND ===== */
+    .risk-legend {
+        max-width: 720px;
+        margin: 0 auto 1rem auto;
+        display: flex;
+        justify-content: center;
+        gap: 1.5rem;
+        padding: 0.75rem 0;
     }
-    
-    /* Buttons - Kakao Yellow CTA */
-    .stButton > button {
-        background: var(--kakao-yellow) !important;
-        color: var(--kakao-brown) !important;
-        border: none !important;
-        border-radius: var(--radius-lg) !important;
-        padding: 0.875rem 2rem !important;
-        font-weight: 700 !important;
-        font-size: 1rem !important;
-        box-shadow: var(--shadow-md) !important;
-        transition: all var(--transition-fast) !important;
-    }
-    .stButton > button:hover {
-        transform: translateY(-2px) !important;
-        box-shadow: var(--shadow-lg) !important;
-        filter: brightness(0.95) !important;
-    }
-    
-    .privacy-badge {
-        display: inline-flex;
+    .legend-item {
+        display: flex;
         align-items: center;
         gap: 0.4rem;
-        background: var(--bg-white);
+        font-size: 0.8rem;
         color: var(--text-tertiary);
-        padding: 0.5rem 1rem;
-        border-radius: var(--radius-xl);
-        font-size: 0.85rem;
-        margin-top: 1rem;
+        font-weight: 500;
+    }
+    .legend-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+    }
+    .legend-dot.high { background: var(--risk-high); }
+    .legend-dot.medium { background: var(--risk-medium); }
+    .legend-dot.low { background: var(--risk-low); }
+    
+    /* ===== DOCUMENT VIEWER ===== */
+    .document-viewer {
+        max-width: 720px;
+        margin: 0 auto 2rem auto;
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-lg);
+        padding: 2rem;
+        font-size: 0.9375rem;
+        line-height: 1.9;
+        white-space: pre-wrap;
+        color: var(--text-primary);
         box-shadow: var(--shadow-sm);
     }
     
-    /* File Uploader - Big Dropzone */
+    /* ===== RISK HIGHLIGHTS ===== */
+    .risk-highlight-wrapper {
+        position: relative;
+        display: inline;
+    }
+    
+    .risk-mark {
+        cursor: pointer;
+        border-radius: 3px;
+        transition: all var(--transition);
+        padding: 1px 2px;
+        margin: 0 -2px;
+    }
+    .risk-mark:hover {
+        filter: brightness(0.95);
+    }
+    
+    /* Tooltip - Clean minimal style */
+    .risk-tooltip {
+        position: absolute;
+        left: calc(100% + 12px);
+        top: -4px;
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-md);
+        padding: 12px 14px;
+        width: max-content;
+        max-width: 240px;
+        box-shadow: var(--shadow-lg);
+        z-index: 1000;
+        opacity: 0;
+        visibility: hidden;
+        transform: translateX(-8px);
+        transition: all var(--transition);
+        pointer-events: none;
+    }
+    
+    .risk-tooltip::before {
+        content: '';
+        position: absolute;
+        left: -6px;
+        top: 12px;
+        width: 10px;
+        height: 10px;
+        background: var(--bg-card);
+        border-left: 1px solid var(--border-color);
+        border-bottom: 1px solid var(--border-color);
+        transform: rotate(45deg);
+    }
+    
+    .risk-highlight-wrapper:hover .risk-tooltip {
+        opacity: 1;
+        visibility: visible;
+        transform: translateX(0);
+        pointer-events: auto;
+    }
+    
+    .tooltip-header {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-weight: 600;
+        font-size: 0.8rem;
+        color: var(--text-primary);
+        margin-bottom: 6px;
+    }
+    
+    .tooltip-content {
+        display: block;
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+        line-height: 1.5;
+    }
+    
+    .tooltip-hint {
+        display: block;
+        font-size: 0.7rem;
+        color: var(--text-muted);
+        margin-top: 8px;
+        padding-top: 8px;
+        border-top: 1px solid var(--border-color);
+    }
+    
+    /* ===== MODAL ===== */
+    .modal-toggle {
+        display: none;
+    }
+    
+    .css-modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 9999;
+        display: none;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .modal-toggle:checked + .css-modal-overlay {
+        display: flex;
+    }
+    
+    .modal-overlay-bg {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(4px);
+        cursor: pointer;
+    }
+    
+    .risk-mark-label {
+        cursor: pointer;
+    }
+    
+    .modal-content {
+        position: relative;
+        z-index: 10000;
+        background: var(--bg-card);
+        border-radius: var(--radius-lg);
+        max-width: 480px;
+        width: 90%;
+        max-height: 80vh;
+        overflow-y: auto;
+        box-shadow: var(--shadow-lg);
+        animation: modalFadeIn 0.25s ease;
+    }
+    
+    @keyframes modalFadeIn {
+        from {
+            opacity: 0;
+            transform: scale(0.96);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+    
+    .modal-header {
+        padding: 1.25rem 1.5rem;
+        border-bottom: 1px solid var(--border-color);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        position: sticky;
+        top: 0;
+        background: var(--bg-card);
+        z-index: 1;
+    }
+    
+    .modal-title {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .modal-close {
+        background: var(--bg-subtle);
+        border: none;
+        font-size: 1.1rem;
+        cursor: pointer;
+        color: var(--text-tertiary);
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: var(--radius-sm);
+        transition: all var(--transition);
+    }
+    
+    .modal-close:hover {
+        background: var(--border-color);
+        color: var(--text-primary);
+    }
+    
+    .modal-body {
+        padding: 1.5rem;
+    }
+    
+    .modal-section {
+        margin-bottom: 1.25rem;
+    }
+    
+    .modal-section:last-child {
+        margin-bottom: 0;
+    }
+    
+    .modal-section-title {
+        font-size: 0.7rem;
+        font-weight: 600;
+        color: var(--text-muted);
+        margin-bottom: 0.5rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+    }
+    
+    .modal-section-content {
+        font-size: 0.875rem;
+        color: var(--text-secondary);
+        line-height: 1.7;
+        background: var(--bg-subtle);
+        padding: 12px 14px;
+        border-radius: var(--radius-md);
+    }
+    
+    .modal-original-text {
+        background: var(--risk-medium-bg);
+        border-left: 3px solid var(--risk-medium);
+        border-radius: 0 var(--radius-md) var(--radius-md) 0;
+    }
+    
+    .modal-legal-ref {
+        background: #EFF6FF;
+        border-left: 3px solid #3B82F6;
+    }
+    
+    .modal-script {
+        background: var(--risk-low-bg);
+        border-left: 3px solid var(--risk-low);
+    }
+    
+    /* ===== RISK BADGES ===== */
+    .risk-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 4px 10px;
+        border-radius: var(--radius-sm);
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+    
+    .risk-badge.high {
+        background: var(--risk-high-bg);
+        color: var(--risk-high);
+    }
+    
+    .risk-badge.medium {
+        background: var(--risk-medium-bg);
+        color: #B45309;
+    }
+    
+    .risk-badge.low {
+        background: var(--risk-low-bg);
+        color: var(--risk-low);
+    }
+    
+    /* ===== BUTTONS ===== */
+    .stButton > button {
+        background: var(--text-primary) !important;
+        color: white !important;
+        border: none !important;
+        border-radius: var(--radius-md) !important;
+        padding: 0.75rem 1.5rem !important;
+        font-weight: 600 !important;
+        font-size: 0.9rem !important;
+        box-shadow: var(--shadow-sm) !important;
+        transition: all var(--transition) !important;
+    }
+    .stButton > button:hover {
+        background: var(--text-secondary) !important;
+        transform: translateY(-1px) !important;
+        box-shadow: var(--shadow-md) !important;
+    }
+    
+    /* ===== FILE UPLOADER ===== */
     [data-testid="stFileUploader"] {
-        max-width: 800px !important;
+        max-width: 720px !important;
         margin: 0 auto !important;
     }
     [data-testid="stFileUploader"] > div:first-child {
         display: none !important;
     }
     [data-testid="stFileUploader"] section {
-        background: var(--bg-white) !important;
-        border: 2px dashed #E0E0E0 !important;
-        border-radius: var(--radius-xl) !important;
-        min-height: 380px !important;
+        background: var(--bg-card) !important;
+        border: 1px dashed var(--border-color) !important;
+        border-radius: var(--radius-lg) !important;
+        min-height: 280px !important;
         padding: 2rem !important;
-        transition: all var(--transition-fast) !important;
+        transition: all var(--transition) !important;
         box-shadow: var(--shadow-sm) !important;
     }
     [data-testid="stFileUploader"] section:hover {
-        border-color: var(--kakao-yellow) !important;
-        background: #FFFEF5 !important;
+        border-color: var(--text-tertiary) !important;
+        background: var(--bg-subtle) !important;
     }
     [data-testid="stFileUploaderDropzone"] {
         background: transparent !important;
         border: none !important;
-        min-height: 340px !important;
+        min-height: 240px !important;
         display: flex !important;
         flex-direction: column !important;
         align-items: center !important;
@@ -251,340 +551,100 @@ st.markdown("""
     [data-testid="stFileUploaderDropzone"]::before {
         content: '';
         display: block;
-        width: 64px;
-        height: 64px;
-        background: var(--kakao-yellow) url("data:image/svg+xml,%3Csvg width='28' height='28' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M12 4L12 16M12 4L7 9M12 4L17 9' stroke='%233C1E1E' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M4 17L4 18C4 19.1046 4.89543 20 6 20L18 20C19.1046 20 20 19.1046 20 18L20 17' stroke='%233C1E1E' stroke-width='2.5' stroke-linecap='round'/%3E%3C/svg%3E") center/28px no-repeat;
-        border-radius: var(--radius-lg);
-        margin-bottom: 1.5rem;
+        width: 48px;
+        height: 48px;
+        background: var(--bg-subtle) url("data:image/svg+xml,%3Csvg width='24' height='24' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M12 4L12 16M12 4L7 9M12 4L17 9' stroke='%2371717A' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M4 17L4 18C4 19.1046 4.89543 20 6 20L18 20C19.1046 20 20 19.1046 20 18L20 17' stroke='%2371717A' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E") center/24px no-repeat;
+        border-radius: var(--radius-md);
+        margin-bottom: 1rem;
     }
     
     [data-testid="stFileUploaderDropzone"]::after {
         content: '계약서 이미지를 업로드하세요';
-        font-size: 1.1rem;
-        color: var(--text-primary);
-        font-weight: 600;
-        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+        color: var(--text-tertiary);
+        font-weight: 500;
     }
     
-    /* Uploaded image preview */
+    /* ===== MISC ===== */
     .uploaded-preview {
-        max-width: 800px;
+        max-width: 720px;
         margin: 0 auto 1.5rem auto;
-        background: var(--bg-white);
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
         border-radius: var(--radius-lg);
         padding: 1.5rem;
-        box-shadow: var(--shadow-md);
+        box-shadow: var(--shadow-sm);
     }
     
     .analyze-button-container {
-        max-width: 400px;
+        max-width: 320px;
         margin: 0 auto;
     }
     
     .no-risks-banner {
-        background: var(--color-safe-bg);
-        border-radius: var(--radius-lg);
-        padding: 2rem;
-        text-align: center;
-        color: var(--color-safe);
+        max-width: 720px;
         margin: 1rem auto;
-        max-width: 900px;
-        font-weight: 600;
-        box-shadow: var(--shadow-sm);
+        background: var(--risk-low-bg);
+        border: 1px solid #A7F3D0;
+        border-radius: var(--radius-lg);
+        padding: 1.5rem;
+        text-align: center;
+        color: var(--risk-low);
+        font-weight: 500;
     }
     
     .instruction-hint {
+        max-width: 720px;
+        margin: 0 auto 1.5rem auto;
         text-align: center;
-        color: var(--text-tertiary);
-        font-size: 0.9rem;
-        margin-bottom: 1.5rem;
-        padding: 1rem 1.5rem;
-        background: var(--bg-white);
-        border-radius: var(--radius-lg);
-        max-width: 900px;
-        margin-left: auto;
-        margin-right: auto;
-        box-shadow: var(--shadow-sm);
+        color: var(--text-muted);
+        font-size: 0.85rem;
+        padding: 0.75rem 1rem;
+    }
+    
+    .privacy-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+        color: var(--text-muted);
+        font-size: 0.8rem;
+        margin-top: 0.75rem;
     }
     
     .footer-mini {
         text-align: center;
-        padding: 1.5rem;
+        padding: 2rem 1rem;
         color: var(--text-muted);
-        font-size: 0.8rem;
-        margin-top: 2rem;
-    }
-    
-    /* ===== TOOLTIP - Sticky Note Style ===== */
-    .risk-highlight-wrapper {
-        position: relative;
-        display: inline-block;
-    }
-    
-    .risk-mark {
-        cursor: pointer;
-        transition: all var(--transition-fast);
-        border-radius: 4px;
-    }
-    
-    .risk-mark:hover {
-        filter: brightness(0.92);
-        transform: scale(1.02);
-    }
-    
-    .risk-tooltip {
-        position: absolute;
-        left: calc(100% + 8px);
-        top: -8px;
-        background: #FFFDE7;
-        border: none;
-        border-radius: var(--radius-md);
-        padding: 14px 16px;
-        width: max-content;
-        max-width: 260px;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.15), 0 0 0 1px rgba(0,0,0,0.05);
-        z-index: 1000;
-        opacity: 0;
-        visibility: hidden;
-        transform: scale(0.95) translateX(-4px);
-        transition: all var(--transition-fast);
-        pointer-events: none;
-        display: block;
-    }
-    
-    .risk-tooltip::before {
-        content: '';
-        position: absolute;
-        left: -6px;
-        top: 14px;
-        width: 12px;
-        height: 12px;
-        background: #FFFDE7;
-        transform: rotate(45deg);
-        box-shadow: -2px 2px 4px rgba(0,0,0,0.05);
-    }
-    
-    .risk-highlight-wrapper:hover .risk-tooltip {
-        opacity: 1;
-        visibility: visible;
-        transform: scale(1) translateX(0);
-        pointer-events: auto;
-    }
-    
-    .tooltip-header {
-        display: block;
-        font-weight: 700;
-        font-size: 0.9rem;
-        color: var(--text-primary);
-        margin-bottom: 8px;
-    }
-    
-    .tooltip-content {
-        display: block;
-        font-size: 0.85rem;
-        color: var(--text-secondary);
-        line-height: 1.5;
-    }
-    
-    .tooltip-hint {
-        display: block;
         font-size: 0.75rem;
-        color: var(--text-tertiary);
-        margin-top: 10px;
-        padding-top: 8px;
-        border-top: 1px dashed #E0E0E0;
     }
     
-    /* ===== MODAL - Slide Up Animation ===== */
-    .modal-toggle {
-        display: none;
-    }
-    
-    .css-modal-overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        z-index: 9999;
-        display: none;
-        align-items: flex-end;
-        justify-content: center;
-        padding-bottom: 0;
-    }
-    
-    .modal-toggle:checked + .css-modal-overlay {
-        display: flex;
-    }
-    
-    .modal-overlay-bg {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.4);
-        backdrop-filter: blur(4px);
-        cursor: pointer;
-    }
-    
-    .risk-mark-label {
-        cursor: pointer;
-    }
-    
-    /* Modal content - Bottom slide panel */
-    .modal-content {
-        position: relative;
-        z-index: 10000;
-        background: var(--bg-white);
-        border-radius: var(--radius-xl) var(--radius-xl) 0 0;
-        max-width: 600px;
-        width: 100%;
-        max-height: 85vh;
-        overflow-y: auto;
-        box-shadow: 0 -8px 40px rgba(0, 0, 0, 0.2);
-        animation: modalSlideUp 0.3s ease;
-    }
-    
-    @keyframes modalSlideUp {
-        from {
-            opacity: 0;
-            transform: translateY(100%);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-    
-    .modal-header {
-        padding: 20px 24px;
-        border-bottom: 1px solid #F0F0F0;
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-start;
-        position: sticky;
-        top: 0;
-        background: var(--bg-white);
-        z-index: 1;
-    }
-    
-    .modal-title {
-        font-size: 1rem;
-        font-weight: 700;
-        color: var(--text-primary);
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-    }
-    
-    .modal-close {
-        background: var(--bg-primary);
-        border: none;
-        font-size: 1.25rem;
-        cursor: pointer;
-        color: var(--text-tertiary);
-        padding: 8px 12px;
-        border-radius: var(--radius-md);
-        transition: all var(--transition-fast);
-        flex-shrink: 0;
-    }
-    
-    .modal-close:hover {
-        background: #E8E8E8;
-        color: var(--text-primary);
-    }
-    
-    .modal-body {
-        padding: 24px;
-    }
-    
-    .modal-section {
-        margin-bottom: 20px;
-    }
-    
-    .modal-section:last-child {
-        margin-bottom: 0;
-    }
-    
-    .modal-section-title {
-        font-size: 0.8rem;
-        font-weight: 700;
-        color: var(--text-tertiary);
-        margin-bottom: 8px;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
-    
-    .modal-section-content {
-        font-size: 0.95rem;
-        color: var(--text-secondary);
-        line-height: 1.7;
-        background: var(--bg-primary);
-        padding: 14px 16px;
-        border-radius: var(--radius-md);
-    }
-    
-    .modal-original-text {
-        background: var(--color-warning-bg);
-        border-left: 4px solid var(--color-warning);
-        border-radius: 0 var(--radius-md) var(--radius-md) 0;
-        font-weight: 500;
-    }
-    
-    .modal-legal-ref {
-        background: #E3F2FD;
-        border-left: 4px solid #2196F3;
-    }
-    
-    .modal-script {
-        background: var(--color-safe-bg);
-        border-left: 4px solid var(--color-safe);
-    }
-    
-    /* Risk Badges - Pill shape */
-    .risk-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 4px;
-        padding: 6px 14px;
-        border-radius: var(--radius-xl);
-        font-size: 0.8rem;
-        font-weight: 700;
-    }
-    
-    .risk-badge.high {
-        background: var(--color-danger-bg);
-        color: var(--color-danger);
-    }
-    
-    .risk-badge.medium {
-        background: var(--color-warning-bg);
-        color: #BF8C00;
-    }
-    
-    .risk-badge.low {
-        background: var(--color-safe-bg);
-        color: var(--color-safe);
-    }
-    
-    /* Mobile Responsive */
+    /* ===== MOBILE ===== */
     @media (max-width: 768px) {
+        .brand-header {
+            padding: 2rem 1rem;
+        }
+        .document-viewer,
+        .summary-section,
+        .missing-section {
+            margin-left: 1rem;
+            margin-right: 1rem;
+            max-width: none;
+        }
         .risk-tooltip {
             position: fixed;
-            left: 16px !important;
-            right: 16px !important;
+            left: 1rem !important;
+            right: 1rem !important;
             top: auto !important;
-            bottom: 80px;
+            bottom: 5rem;
             max-width: none;
-            width: auto;
         }
         .risk-tooltip::before {
             display: none;
         }
         .modal-content {
             max-width: 100%;
-            border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+            margin: 1rem;
+            max-height: calc(100vh - 2rem);
         }
     }
 </style>
@@ -592,8 +652,9 @@ st.markdown("""
 
 st.markdown("""
 <div class="brand-header">
-    <div class="brand-title">🛡️ 계약서 리스크 하이라이터</div>
-    <div class="brand-subtitle">위험한 조항을 바로 그 자리에서 확인하세요</div>
+    <div class="brand-icon">📋</div>
+    <div class="brand-title">계약서 리스크 하이라이터</div>
+    <div class="brand-subtitle">계약서 속 위험 조항을 AI가 분석해드립니다</div>
 </div>
 """, unsafe_allow_html=True)
 
@@ -683,33 +744,41 @@ else:
     
     if result.summary:
         st.markdown(f"""
-        <div class="summary-banner">
-            ✅ {result.summary}
+        <div class="summary-section">
+            <div class="summary-header">
+                <div class="summary-icon">📊</div>
+                <div class="summary-title">분석 요약</div>
+            </div>
+            <div class="summary-text">{result.summary}</div>
         </div>
         """, unsafe_allow_html=True)
     
     if result.missing_clauses and len(result.missing_clauses) > 0:
-        missing_items = "".join([f'<div class="missing-item"><span>❓</span><span>{clause}</span></div>' for clause in result.missing_clauses])
+        missing_items = "".join([f'<div class="missing-item">{clause}</div>' for clause in result.missing_clauses])
         st.markdown(f"""
         <div class="missing-section">
-            <div class="missing-title">📋 계약서에서 찾지 못한 중요 조항</div>
-            {missing_items}
+            <div class="missing-header">
+                <span class="missing-icon">⚠</span>
+                <span class="missing-title">계약서에서 찾지 못한 중요 조항</span>
+            </div>
+            <div class="missing-list">
+                {missing_items}
+            </div>
         </div>
         """, unsafe_allow_html=True)
     
     st.markdown("""
     <div class="risk-legend">
-        <div class="legend-item"><span class="legend-dot high"></span> 🚨 위험 - 반드시 확인</div>
-        <div class="legend-item"><span class="legend-dot medium"></span> ⚠️ 주의 - 확인 권장</div>
-        <div class="legend-item"><span class="legend-dot low"></span> 💡 참고 - 알아두면 좋아요</div>
+        <div class="legend-item"><span class="legend-dot high"></span> 위험</div>
+        <div class="legend-item"><span class="legend-dot medium"></span> 주의</div>
+        <div class="legend-item"><span class="legend-dot low"></span> 참고</div>
     </div>
     """, unsafe_allow_html=True)
     
     if result.risk_clauses and len(result.risk_clauses) > 0:
         st.markdown("""
         <div class="instruction-hint">
-            💡 <strong>색칠된 부분에 마우스를 올리면</strong> 오른쪽에 메모가 나타나요.<br>
-            <strong>클릭하면</strong> 상세 정보 팝업이 열립니다!
+            색칠된 부분에 마우스를 올리거나 클릭하면 상세 정보를 확인할 수 있어요
         </div>
         """, unsafe_allow_html=True)
     

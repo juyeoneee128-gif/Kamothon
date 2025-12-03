@@ -97,29 +97,32 @@ ContractAnalysisResult:
   - missing_clauses: List[str]
 ```
 
-## Design System (Kakao-Inspired)
-- **Primary Color**: #FEE500 (Kakao Yellow) - CTAs, headers, highlights
-- **Background**: #F7F7F7
-- **Text Neutrals**: #1A1A1A / #3C3C3C / #707070
+## Design System (Modern Premium)
+- **Style**: Clean, minimalist, professional
+- **Background**: #F9F9F9 (soft neutral)
+- **Cards**: White (#FFFFFF) with subtle border (#E4E4E7) and soft shadow
+- **Text Neutrals**: #18181B / #52525B / #71717A / #A1A1AA
+- **Accent**: #FACC15 (yellow) - icons and highlights only
 - **Risk Tokens**:
-  - Danger: #E53935 (bg: #FFEBEE)
-  - Warning: #FFB300 (bg: #FFF8E1)
-  - Safe: #00A86B (bg: #E8F5E9)
-- **Typography**: Pretendard (Noto Sans KR fallback)
-- **Radius**: 16px (rounded, friendly elements)
-- **Shadows**: Soft (0 4px 16px rgba(0,0,0,0.08))
-- **Animation**: 150ms smooth transitions
+  - High: #DC2626 (bg: #FEF2F2)
+  - Medium: #F59E0B (bg: #FFFBEB)
+  - Low: #10B981 (bg: #ECFDF5)
+- **Typography**: Pretendard (Noto Sans KR fallback), clear hierarchy
+- **Radius**: 6-12px (sleek, subtle corners)
+- **Shadows**: Minimal (0 1px 2px to 0 4px 12px)
+- **Layout**: Centered content (max-width 720px), wide margins
 
 ## Recent Changes
 - **2024-12-03**: 
-  - **Kakao-Inspired Design System Overhaul**:
-    - New primary color: Kakao Yellow (#FEE500)
-    - Pretendard font with Noto Sans KR fallback
-    - Rounded corners (16px) with soft shadows
-    - Sticky-note style tooltips with 150ms animations
-    - Bottom slide-up modal animation
-    - Pill-shaped risk badges and legend items
-    - CSS variables for consistent theming
+  - **Modern Premium Design Overhaul**:
+    - Clean, minimalist, professional style
+    - Soft neutral background (#F9F9F9)
+    - Card-based layout with subtle borders and shadows
+    - Yellow accent only for icons and highlights
+    - Sleek border radius (6-12px)
+    - Clear typography hierarchy
+    - Centered content (max-width 720px)
+    - Compact risk legend and missing clauses display
   - **Tooltip + Modal UX Enhancement**:
     - Hover tooltip: sticky-note style box appears to the right
     - Shows emoji, risk label, issue summary, and "click for details" hint

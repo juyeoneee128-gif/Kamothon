@@ -206,22 +206,22 @@ def analyze_contract_image(image_bytes: bytes, mime_type: str = "image/jpeg") ->
 
 
 def get_risk_color(risk_level: str) -> str:
-    """Return background color based on risk level (Kakao design system)."""
+    """Return background color based on risk level (Modern premium design)."""
     colors = {
-        "high": "#FFEBEE",
-        "medium": "#FFF8E1",
-        "low": "#E8F5E9"
+        "high": "#FEF2F2",
+        "medium": "#FFFBEB",
+        "low": "#ECFDF5"
     }
-    return colors.get(risk_level.lower(), "#FFF8E1")
+    return colors.get(risk_level.lower(), "#FFFBEB")
 
 def get_risk_border_color(risk_level: str) -> str:
-    """Return border/accent color based on risk level (Kakao design system)."""
+    """Return border/accent color based on risk level (Modern premium design)."""
     colors = {
-        "high": "#E53935",
-        "medium": "#FFB300",
-        "low": "#00A86B"
+        "high": "#DC2626",
+        "medium": "#F59E0B",
+        "low": "#10B981"
     }
-    return colors.get(risk_level.lower(), "#FFB300")
+    return colors.get(risk_level.lower(), "#F59E0B")
 
 def get_risk_emoji(risk_level: str) -> str:
     """Return emoji based on risk level."""
@@ -292,7 +292,7 @@ def highlight_text_with_risks(extracted_text: str, risk_clauses: list[RiskClause
                 "border_color": border_color
             })
             
-            highlight_html = f'''<span class="risk-highlight-wrapper"><label for="{checkbox_id}" class="risk-mark-label"><mark class="risk-mark" style="background: {bg_color}; border-bottom: 3px solid {border_color}; padding: 2px 4px; border-radius: 4px; cursor: pointer;">{safe_original}<sup style="background: {border_color}; color: white; padding: 1px 6px; border-radius: 8px; font-size: 0.7rem; margin-left: 3px; font-weight: 600;">{emoji}</sup></mark></label><span class="risk-tooltip"><span class="tooltip-header">{emoji} {label}</span><span class="tooltip-content">{safe_summary}</span><span class="tooltip-hint">클릭하면 상세 정보를 볼 수 있어요</span></span></span>'''
+            highlight_html = f'''<span class="risk-highlight-wrapper"><label for="{checkbox_id}" class="risk-mark-label"><mark class="risk-mark" style="background: {bg_color}; border-bottom: 2px solid {border_color}; padding: 1px 2px; border-radius: 3px; cursor: pointer;">{safe_original}</mark></label><span class="risk-tooltip"><span class="tooltip-header"><span style="display:inline-block;width:8px;height:8px;background:{border_color};border-radius:50%;margin-right:6px;"></span>{label}</span><span class="tooltip-content">{safe_summary}</span><span class="tooltip-hint">클릭하여 상세 정보 확인</span></span></span>'''
             
             highlighted = highlighted.replace(safe_original, highlight_html, 1)
     
@@ -310,29 +310,28 @@ def generate_css_modals_html(modal_data_list: list) -> str:
     <div class="modal-content">
         <div class="modal-header">
             <div class="modal-title">
-                <span class="risk-badge {data['risk_level']}">{data['emoji']} {data['label']}</span>
-                {data['summary']}
+                <span class="risk-badge {data['risk_level']}">{data['label']}</span>
             </div>
             <label for="{data['checkbox_id']}" class="modal-close">&times;</label>
         </div>
         <div class="modal-body">
             <div class="modal-section">
-                <div class="modal-section-title">📍 해당 조항</div>
+                <div class="modal-section-title">해당 조항</div>
                 <div class="modal-section-content modal-original-text">"{data['original']}"</div>
             </div>
             <div class="modal-section">
-                <div class="modal-section-title">💡 왜 문제가 될 수 있나요?</div>
+                <div class="modal-section-title">문제점</div>
                 <div class="modal-section-content">{data['explanation']}</div>
             </div>
             <div class="modal-section">
-                <div class="modal-section-title">📚 법적 근거</div>
+                <div class="modal-section-title">법적 근거</div>
                 <div class="modal-section-content modal-legal-ref">
                     <strong>{data['legal_ref']}</strong><br><br>
                     {data['legal_article']}
                 </div>
             </div>
             <div class="modal-section">
-                <div class="modal-section-title">💬 이렇게 말해보세요</div>
+                <div class="modal-section-title">협상 가이드</div>
                 <div class="modal-section-content modal-script">"{data['script']}"</div>
             </div>
         </div>
