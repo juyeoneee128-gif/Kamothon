@@ -672,7 +672,7 @@ st.markdown("""
 <div class="brand-header">
     <div class="brand-icon">📋</div>
     <div class="brand-title">계약서 리스크 하이라이터</div>
-    <div class="brand-subtitle">계약서 속 위험 조항을 AI가 분석해드립니다</div>
+    <div class="brand-subtitle">사회 초년생의 권리를 지키는 AI 기반 계약서 리스크 분석 서비스</div>
 </div>
 """, unsafe_allow_html=True)
 
