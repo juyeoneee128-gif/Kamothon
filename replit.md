@@ -97,10 +97,31 @@ ContractAnalysisResult:
   - missing_clauses: List[str]
 ```
 
+## Design System (Kakao-Inspired)
+- **Primary Color**: #FEE500 (Kakao Yellow) - CTAs, headers, highlights
+- **Background**: #F7F7F7
+- **Text Neutrals**: #1A1A1A / #3C3C3C / #707070
+- **Risk Tokens**:
+  - Danger: #E53935 (bg: #FFEBEE)
+  - Warning: #FFB300 (bg: #FFF8E1)
+  - Safe: #00A86B (bg: #E8F5E9)
+- **Typography**: Pretendard (Noto Sans KR fallback)
+- **Radius**: 16px (rounded, friendly elements)
+- **Shadows**: Soft (0 4px 16px rgba(0,0,0,0.08))
+- **Animation**: 150ms smooth transitions
+
 ## Recent Changes
 - **2024-12-03**: 
+  - **Kakao-Inspired Design System Overhaul**:
+    - New primary color: Kakao Yellow (#FEE500)
+    - Pretendard font with Noto Sans KR fallback
+    - Rounded corners (16px) with soft shadows
+    - Sticky-note style tooltips with 150ms animations
+    - Bottom slide-up modal animation
+    - Pill-shaped risk badges and legend items
+    - CSS variables for consistent theming
   - **Tooltip + Modal UX Enhancement**:
-    - Hover tooltip: memo-style box appears to the right of highlighted text
+    - Hover tooltip: sticky-note style box appears to the right
     - Shows emoji, risk label, issue summary, and "click for details" hint
     - Click-to-modal: Pure CSS modal (checkbox hack, no JavaScript)
     - Modal displays: original text, explanation, legal reference, negotiation script
@@ -111,13 +132,9 @@ ContractAnalysisResult:
   - **Major UX Improvement**: Inline annotation experience
     - Single-column document view (removed separate right panel)
     - Color-coded `<mark>` highlights with native browser tooltips on hover
-    - Expandable annotation cards below document using HTML `<details>` elements
-    - Click any card to see: original text, explanation, legal basis, negotiation script
     - Security: All text properly HTML-escaped to prevent XSS
   - Added OCR: Gemini extracts full contract text from image
-  - Color-coded inline highlights (red=high, orange=medium, green=low)
-  - Complete UI/UX redesign with warm, friendly brand identity
-  - New color palette: Mint + Blue Green (#0097A7, #00BCD4, #F6FAFB)
+  - Color-coded inline highlights using design system tokens
   - Friendly Korean copywriting for young workers
   - Implemented Gemini Vision contract analysis
   - Created gemini_analyzer.py with structured response

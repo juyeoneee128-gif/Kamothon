@@ -206,22 +206,22 @@ def analyze_contract_image(image_bytes: bytes, mime_type: str = "image/jpeg") ->
 
 
 def get_risk_color(risk_level: str) -> str:
-    """Return color code based on risk level."""
+    """Return background color based on risk level (Kakao design system)."""
     colors = {
-        "high": "#FFCDD2",
-        "medium": "#FFE0B2",
-        "low": "#C8E6C9"
+        "high": "#FFEBEE",
+        "medium": "#FFF8E1",
+        "low": "#E8F5E9"
     }
-    return colors.get(risk_level.lower(), "#FFE0B2")
+    return colors.get(risk_level.lower(), "#FFF8E1")
 
 def get_risk_border_color(risk_level: str) -> str:
-    """Return border color based on risk level."""
+    """Return border/accent color based on risk level (Kakao design system)."""
     colors = {
-        "high": "#EF5350",
-        "medium": "#FFA726",
-        "low": "#66BB6A"
+        "high": "#E53935",
+        "medium": "#FFB300",
+        "low": "#00A86B"
     }
-    return colors.get(risk_level.lower(), "#FFA726")
+    return colors.get(risk_level.lower(), "#FFB300")
 
 def get_risk_emoji(risk_level: str) -> str:
     """Return emoji based on risk level."""
