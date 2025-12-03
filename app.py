@@ -626,6 +626,7 @@ st.markdown("""
     
     /* ===== MISC ===== */
     .uploaded-preview {
+        position: relative;
         max-width: 720px;
         margin: 0 auto 1.5rem auto;
         background: var(--bg-card);
@@ -635,9 +636,39 @@ st.markdown("""
         box-shadow: var(--shadow-sm);
     }
     
+    .uploaded-preview > div:first-child {
+        position: absolute !important;
+        top: 0.5rem;
+        right: 0.5rem;
+        z-index: 10;
+        width: auto !important;
+    }
+    
+    .uploaded-preview > div:first-child button {
+        width: 28px !important;
+        height: 28px !important;
+        min-width: 28px !important;
+        min-height: 28px !important;
+        padding: 0 !important;
+        background: rgba(0,0,0,0.6) !important;
+        border: none !important;
+        border-radius: 50% !important;
+        color: white !important;
+        font-size: 0.9rem !important;
+        line-height: 1 !important;
+    }
+    
+    .uploaded-preview > div:first-child button:hover {
+        background: rgba(0,0,0,0.8) !important;
+    }
+    
+    .uploaded-preview > div:first-child p {
+        display: none !important;
+    }
+    
     .analyze-button-container {
-        max-width: 320px;
-        margin: 0 auto;
+        max-width: 240px;
+        margin: 0 auto 1rem auto;
     }
     
     .no-risks-banner {
@@ -762,15 +793,9 @@ if not st.session_state.analysis_complete:
     else:
         st.session_state.uploaded_image = uploaded_file
         
-        col1, col2 = st.columns([5, 1])
-        with col1:
-            analyze_clicked = st.button("🔍 계약서 분석하기", type="primary", use_container_width=True)
-        with col2:
-            cancel_clicked = st.button("✕", use_container_width=True, help="업로드 취소")
-        
-        if cancel_clicked:
-            st.session_state.uploaded_image = None
-            st.rerun()
+        st.markdown('<div class="analyze-button-container">', unsafe_allow_html=True)
+        analyze_clicked = st.button("🔍 계약서 분석하기", type="primary", use_container_width=True)
+        st.markdown('</div>', unsafe_allow_html=True)
         
         if analyze_clicked:
             with st.spinner("AI가 계약서를 읽고 분석하고 있어요... 잠시만요! 📖"):
@@ -797,8 +822,14 @@ if not st.session_state.analysis_complete:
             st.rerun()
         
         st.markdown('<div class="uploaded-preview">', unsafe_allow_html=True)
+        
+        cancel_clicked = st.button("✕", key="cancel_upload", help="업로드 취소")
+        if cancel_clicked:
+            st.session_state.uploaded_image = None
+            st.rerun()
+        
         image = Image.open(uploaded_file)
-        st.image(image, caption="📋 업로드된 계약서", use_container_width=True)
+        st.image(image, use_container_width=True)
         st.markdown('</div>', unsafe_allow_html=True)
         
         if st.session_state.analysis_error:
