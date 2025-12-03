@@ -138,22 +138,90 @@ def get_risk_label(risk_level: str) -> str:
 
 def highlight_text_with_risks(extracted_text: str, risk_clauses: list[RiskClause]) -> str:
     """
-    Apply inline highlights to the extracted text for each risk clause.
-    Returns HTML with highlighted risk sections.
-    Uses numbered markers to connect with the right panel.
+    Apply inline highlights with hover tooltips to the extracted text.
+    Returns HTML with highlighted risk sections and embedded tooltips.
+    Uses CSS :has() selector for proper sibling-based toggle without nesting divs in spans.
     """
-    highlighted = extracted_text
+    import html
     
-    clause_index_map = {clause.clause_id: i + 1 for i, clause in enumerate(risk_clauses)}
+    safe_text = html.escape(extracted_text)
+    highlighted = safe_text
     
-    for clause in sorted(risk_clauses, key=lambda x: len(x.original_text), reverse=True):
-        if clause.original_text and clause.original_text in highlighted:
+    for idx, clause in enumerate(sorted(risk_clauses, key=lambda x: len(x.original_text), reverse=True), 1):
+        safe_original = html.escape(clause.original_text)
+        
+        if safe_original and safe_original in highlighted:
             bg_color = get_risk_color(clause.risk_level)
             border_color = get_risk_border_color(clause.risk_level)
-            clause_num = clause_index_map.get(clause.clause_id, 0)
+            emoji = get_risk_emoji(clause.risk_level)
+            label = get_risk_label(clause.risk_level)
             
-            highlight_html = f'''<span class="risk-highlight" id="highlight-{clause.clause_id}" style="background: {bg_color}; border-bottom: 2px solid {border_color}; padding: 2px 4px; border-radius: 4px; position: relative; display: inline;">{clause.original_text}<sup style="background: {border_color}; color: white; padding: 1px 8px; border-radius: 10px; font-size: 0.75rem; margin-left: 4px; font-weight: 700;">{clause_num}</sup></span>'''
+            safe_summary = html.escape(clause.issue_summary)
+            safe_explanation = html.escape(clause.simple_explanation)
+            safe_legal_ref = html.escape(clause.legal_reference)
+            safe_legal_article = html.escape(clause.legal_article)
+            safe_script = html.escape(clause.negotiation_script)
             
-            highlighted = highlighted.replace(clause.original_text, highlight_html, 1)
+            highlight_html = f'''<mark class="risk-mark" style="background: {bg_color}; border-bottom: 3px solid {border_color}; padding: 2px 4px; border-radius: 4px; cursor: help;" title="{emoji} {safe_summary} - 클릭하여 상세 보기">{safe_original}<sup style="background: {border_color}; color: white; padding: 1px 6px; border-radius: 8px; font-size: 0.7rem; margin-left: 3px; font-weight: 600;">{emoji}</sup></mark>'''
+            
+            highlighted = highlighted.replace(safe_original, highlight_html, 1)
     
     return highlighted
+
+
+def generate_annotation_cards(risk_clauses: list[RiskClause]) -> str:
+    """
+    Generate expandable annotation cards for each risk clause.
+    These appear below the document as clickable cards.
+    """
+    import html
+    
+    if not risk_clauses:
+        return ""
+    
+    cards_html = '<div class="annotation-cards">'
+    
+    for idx, clause in enumerate(risk_clauses, 1):
+        bg_color = get_risk_color(clause.risk_level)
+        border_color = get_risk_border_color(clause.risk_level)
+        emoji = get_risk_emoji(clause.risk_level)
+        label = get_risk_label(clause.risk_level)
+        
+        safe_original = html.escape(clause.original_text)
+        safe_summary = html.escape(clause.issue_summary)
+        safe_explanation = html.escape(clause.simple_explanation)
+        safe_legal_ref = html.escape(clause.legal_reference)
+        safe_legal_article = html.escape(clause.legal_article)
+        safe_script = html.escape(clause.negotiation_script)
+        
+        cards_html += f'''
+<details class="annotation-card" style="border-left: 4px solid {border_color};">
+<summary class="annotation-summary" style="background: {bg_color};">
+<span class="annotation-number" style="background: {border_color};">{idx}</span>
+<span class="annotation-title">{emoji} {safe_summary}</span>
+</summary>
+<div class="annotation-detail">
+<div class="annotation-quote">
+<strong>📍 해당 문구:</strong><br>
+"{safe_original}"
+</div>
+<div class="annotation-section">
+<div class="annotation-label">💡 왜 문제가 될 수 있나요?</div>
+<div class="annotation-content">{safe_explanation}</div>
+</div>
+<div class="annotation-section">
+<div class="annotation-label">📚 법적 근거</div>
+<div class="annotation-legal">
+<strong>{safe_legal_ref}</strong><br>
+{safe_legal_article}
+</div>
+</div>
+<div class="annotation-section">
+<div class="annotation-label">💬 이렇게 말해보세요</div>
+<div class="annotation-script">"{safe_script}"</div>
+</div>
+</div>
+</details>'''
+    
+    cards_html += '</div>'
+    return cards_html

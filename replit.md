@@ -99,13 +99,14 @@ ContractAnalysisResult:
 
 ## Recent Changes
 - **2024-12-03**: 
-  - **Major UX Improvement**: In-context risk highlighting
-    - Left panel: Document view with inline highlighted risky clauses
-    - Right panel: Detailed breakdown with legal basis and scripts
-    - Numbered markers connect highlights to detail panel
+  - **Major UX Improvement**: Inline annotation experience
+    - Single-column document view (removed separate right panel)
+    - Color-coded `<mark>` highlights with native browser tooltips on hover
+    - Expandable annotation cards below document using HTML `<details>` elements
+    - Click any card to see: original text, explanation, legal basis, negotiation script
+    - Security: All text properly HTML-escaped to prevent XSS
   - Added OCR: Gemini extracts full contract text from image
   - Color-coded inline highlights (red=high, orange=medium, green=low)
-  - Click-to-expand interaction for legal basis and negotiation scripts
   - Complete UI/UX redesign with warm, friendly brand identity
   - New color palette: Mint + Blue Green (#0097A7, #00BCD4, #F6FAFB)
   - Friendly Korean copywriting for young workers
