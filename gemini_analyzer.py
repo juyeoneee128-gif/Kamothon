@@ -5,7 +5,7 @@ from typing import Optional, List
 
 from pydantic import BaseModel
 
-DEMO_MODE = True
+DEMO_MODE = False
 
 class RiskClause(BaseModel):
     clause_id: str
