@@ -440,7 +440,7 @@ st.markdown("""
     /* Tooltip container for highlighted text */
     .risk-highlight-wrapper {
         position: relative;
-        display: inline;
+        display: inline-block;
     }
     
     .risk-mark {
@@ -471,6 +471,7 @@ st.markdown("""
         visibility: hidden;
         transition: opacity 0.2s ease, visibility 0.2s ease;
         pointer-events: none;
+        display: block;
     }
     
     .risk-tooltip::before {
