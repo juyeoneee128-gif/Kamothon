@@ -444,25 +444,43 @@ st.markdown("""
         font-size: 0.875rem;
         color: var(--text-secondary);
         line-height: 1.7;
-        background: var(--bg-subtle);
-        padding: 12px 14px;
-        border-radius: var(--radius-md);
     }
     
+    /* Neutral sections - no background color */
     .modal-original-text {
-        background: var(--risk-medium-bg);
-        border-left: 3px solid var(--risk-medium);
-        border-radius: 0 var(--radius-md) var(--radius-md) 0;
+        color: var(--text-tertiary);
+        font-style: italic;
+        padding: 0;
     }
     
     .modal-legal-ref {
-        background: #EFF6FF;
-        border-left: 3px solid #3B82F6;
+        color: var(--text-tertiary);
+        font-size: 0.8rem;
+        padding: 0;
+    }
+    
+    /* Emphasized sections */
+    .modal-issue-section {
+        background: var(--accent-yellow);
+        padding: 14px 16px;
+        border-radius: var(--radius-md);
+        color: var(--text-primary);
+        font-weight: 500;
     }
     
     .modal-script {
-        background: var(--risk-low-bg);
-        border-left: 3px solid var(--risk-low);
+        background: var(--text-primary);
+        color: white;
+        padding: 16px 18px;
+        border-radius: var(--radius-md);
+        font-weight: 500;
+        font-size: 0.95rem;
+    }
+    
+    .modal-script-section .modal-section-title {
+        color: var(--text-primary);
+        font-size: 0.8rem;
+        font-weight: 700;
     }
     
     /* ===== RISK BADGES ===== */

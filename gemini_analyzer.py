@@ -320,19 +320,19 @@ def generate_css_modals_html(modal_data_list: list) -> str:
                 <div class="modal-section-content modal-original-text">"{data['original']}"</div>
             </div>
             <div class="modal-section">
-                <div class="modal-section-title">문제점</div>
-                <div class="modal-section-content">{data['explanation']}</div>
+                <div class="modal-section-title">왜 문제가 될 수 있나요?</div>
+                <div class="modal-section-content modal-issue-section">{data['explanation']}</div>
+            </div>
+            <div class="modal-section modal-script-section">
+                <div class="modal-section-title">💬 이렇게 말해보세요</div>
+                <div class="modal-section-content modal-script">"{data['script']}"</div>
             </div>
             <div class="modal-section">
                 <div class="modal-section-title">법적 근거</div>
                 <div class="modal-section-content modal-legal-ref">
-                    <strong>{data['legal_ref']}</strong><br><br>
+                    <strong>{data['legal_ref']}</strong><br>
                     {data['legal_article']}
                 </div>
-            </div>
-            <div class="modal-section">
-                <div class="modal-section-title">협상 가이드</div>
-                <div class="modal-section-content modal-script">"{data['script']}"</div>
             </div>
         </div>
     </div>
