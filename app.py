@@ -63,36 +63,60 @@ st.markdown("""
         background: var(--bg-page);
     }
     
-    /* ===== HEADER - Clean & Minimal ===== */
+    /* ===== HEADER - Fixed at Top ===== */
     .brand-header {
-        max-width: 720px;
-        margin: 0 auto 2rem auto;
-        padding: 2.5rem 1.5rem;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 9999;
+        background: var(--bg-card);
+        border-bottom: 1px solid var(--border-color);
+        padding: 0.875rem 1.5rem;
         text-align: center;
+        box-shadow: var(--shadow-sm);
+    }
+    
+    /* Spacer for fixed header */
+    .header-spacer {
+        height: 80px;
+    }
+    
+    /* Hide Streamlit header to avoid overlap */
+    header[data-testid="stHeader"] {
+        display: none !important;
     }
     .brand-icon {
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        width: 48px;
-        height: 48px;
+        width: 32px;
+        height: 32px;
         background: var(--accent-yellow);
-        border-radius: var(--radius-md);
-        margin-bottom: 1rem;
-        font-size: 1.5rem;
+        border-radius: var(--radius-sm);
+        margin-right: 0.75rem;
+        font-size: 1rem;
+        vertical-align: middle;
     }
     .brand-title {
+        display: inline;
         color: var(--text-primary);
-        font-size: 1.75rem;
+        font-size: 1.1rem;
         font-weight: 700;
         letter-spacing: -0.02em;
-        margin-bottom: 0.5rem;
+        vertical-align: middle;
     }
     .brand-subtitle {
         color: var(--text-tertiary);
-        font-size: 1rem;
+        font-size: 0.85rem;
         font-weight: 400;
-        line-height: 1.5;
+        margin-top: 0.25rem;
+    }
+    .brand-title-row {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0;
     }
     
     /* ===== CARDS ===== */
@@ -670,10 +694,13 @@ st.markdown("""
 
 st.markdown("""
 <div class="brand-header">
-    <div class="brand-icon">📋</div>
-    <div class="brand-title">계약서 리스크 하이라이터</div>
+    <div class="brand-title-row">
+        <div class="brand-icon">📋</div>
+        <div class="brand-title">계약서 리스크 하이라이터</div>
+    </div>
     <div class="brand-subtitle">사회 초년생의 권리를 지키는 AI 기반 계약서 리스크 분석 서비스</div>
 </div>
+<div class="header-spacer"></div>
 """, unsafe_allow_html=True)
 
 from gemini_analyzer import DEMO_MODE, get_demo_result
