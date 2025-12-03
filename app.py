@@ -1,6 +1,7 @@
 import streamlit as st
 from PIL import Image
 import io
+import os
 
 st.set_page_config(
     page_title="계약서 리스크 하이라이터",
@@ -38,6 +39,13 @@ st.markdown("""
         border-radius: 0 8px 8px 0;
         margin: 1rem 0;
     }
+    .danger-box {
+        background-color: #fdecea;
+        border-left: 4px solid #e74c3c;
+        padding: 1rem 1.5rem;
+        border-radius: 0 8px 8px 0;
+        margin: 1rem 0;
+    }
     .info-box {
         background-color: #e8f4fd;
         border-left: 4px solid #2196f3;
@@ -68,6 +76,17 @@ st.markdown("""
         font-size: 0.95rem;
         font-style: italic;
     }
+    .error-text {
+        color: #c62828;
+        font-size: 0.95rem;
+    }
+    .summary-box {
+        background-color: #f5f5f5;
+        padding: 1rem 1.5rem;
+        border-radius: 8px;
+        margin: 1rem 0;
+        border: 1px solid #e0e0e0;
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -79,6 +98,44 @@ if 'analysis_complete' not in st.session_state:
     st.session_state.analysis_complete = False
 if 'uploaded_image' not in st.session_state:
     st.session_state.uploaded_image = None
+if 'analysis_result' not in st.session_state:
+    st.session_state.analysis_result = None
+if 'analysis_error' not in st.session_state:
+    st.session_state.analysis_error = None
+
+def get_mime_type(filename: str) -> str:
+    """Get MIME type from filename."""
+    ext = filename.lower().split('.')[-1]
+    mime_types = {
+        'jpg': 'image/jpeg',
+        'jpeg': 'image/jpeg',
+        'png': 'image/png'
+    }
+    return mime_types.get(ext, 'image/jpeg')
+
+def get_risk_box_class(risk_level: str) -> str:
+    """Return CSS class based on risk level."""
+    if risk_level.lower() == 'high':
+        return 'danger-box'
+    return 'warning-box'
+
+def get_risk_emoji(risk_level: str) -> str:
+    """Return emoji based on risk level."""
+    emojis = {
+        'high': '🚨',
+        'medium': '⚠️',
+        'low': '💡'
+    }
+    return emojis.get(risk_level.lower(), '⚠️')
+
+def get_risk_label(risk_level: str) -> str:
+    """Return Korean label based on risk level."""
+    labels = {
+        'high': '높은 위험',
+        'medium': '주의 필요',
+        'low': '참고 사항'
+    }
+    return labels.get(risk_level.lower(), '주의 필요')
 
 col_upload, col_spacer, col_result = st.columns([1, 0.1, 1.2])
 
@@ -118,15 +175,49 @@ with col_upload:
         
         if st.button("🔍 계약서 분석하기", type="primary", use_container_width=True):
             with st.spinner("AI가 계약서를 꼼꼼히 분석하고 있어요..."):
-                import time
-                time.sleep(2)
-                st.session_state.analysis_complete = True
-                st.rerun()
+                try:
+                    from gemini_analyzer import analyze_contract_image
+                    
+                    uploaded_file.seek(0)
+                    image_bytes = uploaded_file.read()
+                    mime_type = get_mime_type(uploaded_file.name)
+                    
+                    result = analyze_contract_image(image_bytes, mime_type)
+                    
+                    if result:
+                        st.session_state.analysis_result = result
+                        st.session_state.analysis_complete = True
+                        st.session_state.analysis_error = None
+                    else:
+                        st.session_state.analysis_error = "분석 결과를 받지 못했습니다. 다시 시도해주세요."
+                        
+                except Exception as e:
+                    st.session_state.analysis_error = str(e)
+                    st.session_state.analysis_complete = False
+                    
+            st.rerun()
 
 with col_result:
     st.markdown('<p class="step-header">2️⃣ 분석 결과</p>', unsafe_allow_html=True)
     
-    if not st.session_state.analysis_complete:
+    if st.session_state.analysis_error:
+        st.markdown(f"""
+        <div class="danger-box">
+            <p class="error-text">
+            ❌ 분석 중 오류가 발생했습니다.<br>
+            {st.session_state.analysis_error}<br><br>
+            다시 시도해주세요.
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        if st.button("🔄 다시 시도하기", use_container_width=True):
+            st.session_state.analysis_complete = False
+            st.session_state.analysis_error = None
+            st.session_state.analysis_result = None
+            st.rerun()
+    
+    elif not st.session_state.analysis_complete:
         st.markdown("""
         <div class="info-box">
             <p class="friendly-text">
@@ -140,76 +231,90 @@ with col_result:
         </div>
         """, unsafe_allow_html=True)
     else:
+        result = st.session_state.analysis_result
+        
         st.markdown("""
         <div class="reassurance-text" style="margin-bottom: 1rem;">
         ✅ 분석이 완료되었습니다. 아래 내용을 확인해주세요.
         </div>
         """, unsafe_allow_html=True)
         
-        st.markdown("### 🚨 주의가 필요한 조항")
-        st.markdown("""
-        <div class="warning-box">
-            <strong>⚠️ 휴게시간 미명시</strong><br>
-            <span class="friendly-text">
-            계약서에 휴게시간에 대한 내용이 명확하게 적혀있지 않아요.
-            </span>
-        </div>
-        """, unsafe_allow_html=True)
+        if result.summary:
+            st.markdown(f"""
+            <div class="summary-box">
+                <strong>📋 요약</strong><br>
+                <span class="friendly-text">{result.summary}</span>
+            </div>
+            """, unsafe_allow_html=True)
         
-        st.markdown("""
-        <div class="warning-box">
-            <strong>⚠️ 해고 예고 조항 누락</strong><br>
-            <span class="friendly-text">
-            해고 시 사전 통보 기간에 대한 내용이 없어요.
-            </span>
-        </div>
-        """, unsafe_allow_html=True)
+        if result.missing_clauses and len(result.missing_clauses) > 0:
+            st.markdown("### 📝 누락된 조항")
+            missing_items = "".join([f"<li>{clause}</li>" for clause in result.missing_clauses])
+            st.markdown(f"""
+            <div class="warning-box">
+                <span class="friendly-text">
+                다음 조항들이 계약서에 없거나 불명확해요:
+                <ul style="margin-top: 0.5rem;">{missing_items}</ul>
+                </span>
+            </div>
+            """, unsafe_allow_html=True)
         
-        st.markdown("<br>", unsafe_allow_html=True)
-        
-        st.markdown("### 📚 왜 문제가 될까요?")
-        st.markdown("""
-        <div class="info-box">
-            <strong>근로기준법 제54조 (휴게)</strong><br>
-            <span class="friendly-text">
-            "사용자는 근로시간이 4시간인 경우에는 30분 이상, 8시간인 경우에는 1시간 이상의 휴게시간을 근로시간 도중에 주어야 한다."<br><br>
-            👉 <strong>쉽게 말하면:</strong> 4시간 일하면 30분, 8시간 일하면 1시간 쉬는 시간이 법으로 보장되어 있어요!
-            </span>
-        </div>
-        """, unsafe_allow_html=True)
-        
-        st.markdown("""
-        <div class="info-box">
-            <strong>근로기준법 제26조 (해고의 예고)</strong><br>
-            <span class="friendly-text">
-            "사용자는 근로자를 해고하려면 적어도 30일 전에 예고를 하여야 한다."<br><br>
-            👉 <strong>쉽게 말하면:</strong> 갑자기 해고하면 안 되고, 최소 한 달 전에 미리 알려줘야 해요!
-            </span>
-        </div>
-        """, unsafe_allow_html=True)
-        
-        st.markdown("<br>", unsafe_allow_html=True)
-        
-        st.markdown("### 🗣️ 이렇게 요청해보세요")
-        st.markdown("""
-        <div class="script-box">
-            <strong>휴게시간 관련 요청:</strong><br>
-            <span class="friendly-text">
-            "안녕하세요, 계약서를 검토하다 보니 휴게시간에 대한 내용이 명시되어 있지 않은 것 같아요. 
-            근로기준법 제54조에 따라 휴게시간을 계약서에 추가해주실 수 있을까요?"
-            </span>
-        </div>
-        """, unsafe_allow_html=True)
-        
-        st.markdown("""
-        <div class="script-box">
-            <strong>해고 예고 관련 요청:</strong><br>
-            <span class="friendly-text">
-            "계약서에 해고 예고 기간이 명시되어 있지 않은데요, 
-            근로기준법 제26조에 따른 30일 전 해고 예고 조항을 추가해주시면 감사하겠습니다."
-            </span>
-        </div>
-        """, unsafe_allow_html=True)
+        if result.risk_clauses and len(result.risk_clauses) > 0:
+            st.markdown("### 🚨 주의가 필요한 조항")
+            
+            for clause in result.risk_clauses:
+                box_class = get_risk_box_class(clause.risk_level)
+                emoji = get_risk_emoji(clause.risk_level)
+                label = get_risk_label(clause.risk_level)
+                
+                st.markdown(f"""
+                <div class="{box_class}">
+                    <strong>{emoji} {label}: {clause.issue_summary}</strong><br>
+                    <span class="friendly-text">
+                    {clause.simple_explanation}
+                    </span>
+                </div>
+                """, unsafe_allow_html=True)
+            
+            st.markdown("<br>", unsafe_allow_html=True)
+            
+            st.markdown("### 📚 왜 문제가 될까요?")
+            
+            for clause in result.risk_clauses:
+                if clause.legal_reference and clause.legal_article:
+                    st.markdown(f"""
+                    <div class="info-box">
+                        <strong>{clause.legal_reference}</strong><br>
+                        <span class="friendly-text">
+                        "{clause.legal_article}"<br><br>
+                        👉 <strong>쉽게 말하면:</strong> {clause.simple_explanation}
+                        </span>
+                    </div>
+                    """, unsafe_allow_html=True)
+            
+            st.markdown("<br>", unsafe_allow_html=True)
+            
+            st.markdown("### 🗣️ 이렇게 요청해보세요")
+            
+            for clause in result.risk_clauses:
+                if clause.negotiation_script:
+                    st.markdown(f"""
+                    <div class="script-box">
+                        <strong>{clause.issue_summary} 관련 요청:</strong><br>
+                        <span class="friendly-text">
+                        "{clause.negotiation_script}"
+                        </span>
+                    </div>
+                    """, unsafe_allow_html=True)
+        else:
+            st.markdown("""
+            <div class="script-box">
+                <strong>✨ 특별한 위험 조항이 발견되지 않았어요!</strong><br>
+                <span class="friendly-text">
+                계약서가 대체로 적정해 보입니다. 그래도 서명 전에 모든 내용을 꼼꼼히 읽어보세요.
+                </span>
+            </div>
+            """, unsafe_allow_html=True)
         
         st.markdown("<br>", unsafe_allow_html=True)
         
@@ -225,6 +330,8 @@ with col_result:
         if st.button("🔄 다른 계약서 분석하기", use_container_width=True):
             st.session_state.analysis_complete = False
             st.session_state.uploaded_image = None
+            st.session_state.analysis_result = None
+            st.session_state.analysis_error = None
             st.rerun()
 
 st.markdown("---")
