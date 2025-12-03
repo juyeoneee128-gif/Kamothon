@@ -99,16 +99,18 @@ ContractAnalysisResult:
 
 ## Recent Changes
 - **2024-12-03**: 
+  - **Major UX Improvement**: In-context risk highlighting
+    - Left panel: Document view with inline highlighted risky clauses
+    - Right panel: Detailed breakdown with legal basis and scripts
+    - Numbered markers connect highlights to detail panel
+  - Added OCR: Gemini extracts full contract text from image
+  - Color-coded inline highlights (red=high, orange=medium, green=low)
+  - Click-to-expand interaction for legal basis and negotiation scripts
   - Complete UI/UX redesign with warm, friendly brand identity
   - New color palette: Mint + Blue Green (#0097A7, #00BCD4, #F6FAFB)
-  - Added gradient brand header with visual identity
-  - Implemented 3-step flow indicator (Upload → AI → Scripts)
   - Friendly Korean copywriting for young workers
-  - Rounded corners, soft shadows, polished spacing
-  - Added footer with benefits micro-copy
   - Implemented Gemini Vision contract analysis
   - Created gemini_analyzer.py with structured response
-  - Added color-coded risk display (danger-box, warning-box)
   - Added privacy messaging
 
 ## Future Improvements
