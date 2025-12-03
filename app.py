@@ -807,26 +807,20 @@ else:
         </div>
         """, unsafe_allow_html=True)
     
-    from gemini_analyzer import highlight_text_with_risks, generate_annotation_cards
+    from gemini_analyzer import highlight_text_with_risks, generate_css_modals_html
     
     if result.extracted_text:
-        highlighted_html = highlight_text_with_risks(result.extracted_text, result.risk_clauses)
+        highlighted_html, modal_data_list = highlight_text_with_risks(result.extracted_text, result.risk_clauses)
+        
+        if modal_data_list:
+            modals_html = generate_css_modals_html(modal_data_list)
+            st.markdown(modals_html, unsafe_allow_html=True)
         
         st.markdown(f"""
         <div class="document-viewer">
             {highlighted_html}
         </div>
         """, unsafe_allow_html=True)
-        
-        if result.risk_clauses and len(result.risk_clauses) > 0:
-            st.markdown("""
-            <div class="section-title">
-                📝 발견된 위험 조항 상세 분석
-            </div>
-            """, unsafe_allow_html=True)
-            
-            cards_html = generate_annotation_cards(result.risk_clauses)
-            st.markdown(cards_html, unsafe_allow_html=True)
     else:
         st.info("텍스트를 추출하지 못했습니다.")
     

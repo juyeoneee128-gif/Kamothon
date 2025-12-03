@@ -296,9 +296,7 @@ def highlight_text_with_risks(extracted_text: str, risk_clauses: list[RiskClause
             
             highlighted = highlighted.replace(safe_original, highlight_html, 1)
     
-    modals_html = generate_css_modals_html(modal_data_list)
-    
-    return highlighted + modals_html
+    return highlighted, modal_data_list
 
 
 def generate_css_modals_html(modal_data_list: list) -> str:
