@@ -99,6 +99,15 @@ ContractAnalysisResult:
 
 ## Recent Changes
 - **2024-12-03**: 
+  - **Tooltip + Modal UX Enhancement**:
+    - Hover tooltip: memo-style box appears to the right of highlighted text
+    - Shows emoji, risk label, issue summary, and "click for details" hint
+    - Click-to-modal: Pure CSS modal (checkbox hack, no JavaScript)
+    - Modal displays: original text, explanation, legal reference, negotiation script
+    - Click overlay background or X button to close modal
+  - **Demo Mode**: DEMO_MODE flag for testing without API calls
+    - Shows sample contract with 5 risk clauses and 3 missing clauses
+    - Set DEMO_MODE = False in gemini_analyzer.py to enable real API
   - **Major UX Improvement**: Inline annotation experience
     - Single-column document view (removed separate right panel)
     - Color-coded `<mark>` highlights with native browser tooltips on hover
