@@ -463,7 +463,7 @@ st.markdown("""
         border: 1px solid #ddd;
         border-radius: 8px;
         padding: 12px 16px;
-        min-width: 200px;
+        width: max-content;
         max-width: 280px;
         box-shadow: 0 4px 20px rgba(0,0,0,0.15);
         z-index: 1000;
