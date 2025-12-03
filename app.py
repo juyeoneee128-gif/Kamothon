@@ -797,7 +797,19 @@ if not st.session_state.analysis_complete:
     else:
         st.session_state.uploaded_image = uploaded_file
         
-        st.markdown('<style>[data-testid="stFileUploader"] { display: none !important; }</style>', unsafe_allow_html=True)
+        st.markdown('''<style>
+            [data-testid="stFileUploader"],
+            [data-testid="stFileUploader"] > *,
+            .stFileUploader,
+            section[data-testid="stFileUploadDropzone"] {
+                display: none !important;
+                height: 0 !important;
+                min-height: 0 !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                overflow: hidden !important;
+            }
+        </style>''', unsafe_allow_html=True)
         
         st.markdown('<div class="analyze-button-container">', unsafe_allow_html=True)
         analyze_clicked = st.button("🔍 계약서 분석하기", type="primary", use_container_width=True)
