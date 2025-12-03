@@ -46,6 +46,7 @@ env/
 
 # ChromaDB
 chroma_data/
+chroma_db/
 *.db
 
 # Logs
