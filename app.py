@@ -745,11 +745,6 @@ if not st.session_state.analysis_complete:
     else:
         st.session_state.uploaded_image = uploaded_file
         
-        st.markdown('<div class="uploaded-preview">', unsafe_allow_html=True)
-        image = Image.open(uploaded_file)
-        st.image(image, caption="📋 업로드된 계약서", use_container_width=True)
-        st.markdown('</div>', unsafe_allow_html=True)
-        
         st.markdown('<div class="analyze-button-container">', unsafe_allow_html=True)
         
         if st.button("🔍 계약서 분석하기", type="primary", use_container_width=True):
@@ -776,6 +771,11 @@ if not st.session_state.analysis_complete:
                     
             st.rerun()
         
+        st.markdown('</div>', unsafe_allow_html=True)
+        
+        st.markdown('<div class="uploaded-preview">', unsafe_allow_html=True)
+        image = Image.open(uploaded_file)
+        st.image(image, caption="📋 업로드된 계약서", use_container_width=True)
         st.markdown('</div>', unsafe_allow_html=True)
         
         if st.session_state.analysis_error:
