@@ -292,7 +292,7 @@ def highlight_text_with_risks(extracted_text: str, risk_clauses: list[RiskClause
                 "border_color": border_color
             })
             
-            highlight_html = f'''<span class="risk-highlight-wrapper"><label for="{checkbox_id}" class="risk-mark-label"><mark class="risk-mark" style="background: {bg_color}; border-bottom: 3px solid {border_color}; padding: 2px 4px; border-radius: 4px; cursor: pointer;">{safe_original}<sup style="background: {border_color}; color: white; padding: 1px 6px; border-radius: 8px; font-size: 0.7rem; margin-left: 3px; font-weight: 600;">{emoji}</sup></mark></label><span class="risk-tooltip"><div class="tooltip-header">{emoji} {label}</div><div class="tooltip-content">{safe_summary}</div><div class="tooltip-hint">클릭하면 상세 정보를 볼 수 있어요</div></span></span>'''
+            highlight_html = f'''<span class="risk-highlight-wrapper"><label for="{checkbox_id}" class="risk-mark-label"><mark class="risk-mark" style="background: {bg_color}; border-bottom: 3px solid {border_color}; padding: 2px 4px; border-radius: 4px; cursor: pointer;">{safe_original}<sup style="background: {border_color}; color: white; padding: 1px 6px; border-radius: 8px; font-size: 0.7rem; margin-left: 3px; font-weight: 600;">{emoji}</sup></mark></label><span class="risk-tooltip"><span class="tooltip-header">{emoji} {label}</span><span class="tooltip-content">{safe_summary}</span><span class="tooltip-hint">클릭하면 상세 정보를 볼 수 있어요</span></span></span>'''
             
             highlighted = highlighted.replace(safe_original, highlight_html, 1)
     

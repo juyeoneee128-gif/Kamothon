@@ -490,22 +490,22 @@ st.markdown("""
     }
     
     .tooltip-header {
+        display: block;
         font-weight: 700;
         font-size: 0.85rem;
         color: #333;
         margin-bottom: 8px;
-        display: flex;
-        align-items: center;
-        gap: 6px;
     }
     
     .tooltip-content {
+        display: block;
         font-size: 0.85rem;
         color: #555;
         line-height: 1.5;
     }
     
     .tooltip-hint {
+        display: block;
         font-size: 0.75rem;
         color: #0097A7;
         margin-top: 10px;
