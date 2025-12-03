@@ -245,14 +245,19 @@ def get_risk_label(risk_level: str) -> str:
 
 def highlight_text_with_risks(extracted_text: str, risk_clauses: list[RiskClause]) -> str:
     """
-    Apply inline highlights with hover tooltips to the extracted text.
-    Returns HTML with highlighted risk sections and embedded tooltips.
-    Uses CSS :has() selector for proper sibling-based toggle without nesting divs in spans.
+    Apply inline highlights with hover tooltips and click-to-modal functionality.
+    Uses pure CSS modal with checkbox hack (no JavaScript needed for Streamlit).
+    Returns HTML with:
+    - Highlighted risk text with colored background
+    - Tooltip appearing on hover (like memo box)
+    - Modal popup on click with full details (pure CSS)
     """
     import html
     
     safe_text = html.escape(extracted_text)
     highlighted = safe_text
+    
+    modal_data_list = []
     
     for idx, clause in enumerate(sorted(risk_clauses, key=lambda x: len(x.original_text), reverse=True), 1):
         safe_original = html.escape(clause.original_text)
@@ -269,11 +274,154 @@ def highlight_text_with_risks(extracted_text: str, risk_clauses: list[RiskClause
             safe_legal_article = html.escape(clause.legal_article)
             safe_script = html.escape(clause.negotiation_script)
             
-            highlight_html = f'''<mark class="risk-mark" style="background: {bg_color}; border-bottom: 3px solid {border_color}; padding: 2px 4px; border-radius: 4px; cursor: help;" title="{emoji} {safe_summary} - 클릭하여 상세 보기">{safe_original}<sup style="background: {border_color}; color: white; padding: 1px 6px; border-radius: 8px; font-size: 0.7rem; margin-left: 3px; font-weight: 600;">{emoji}</sup></mark>'''
+            modal_id = f"risk-modal-{idx}"
+            checkbox_id = f"modal-toggle-{idx}"
+            
+            modal_data_list.append({
+                "id": modal_id,
+                "checkbox_id": checkbox_id,
+                "emoji": emoji,
+                "label": label,
+                "summary": safe_summary,
+                "original": safe_original,
+                "explanation": safe_explanation,
+                "legal_ref": safe_legal_ref,
+                "legal_article": safe_legal_article,
+                "script": safe_script,
+                "risk_level": clause.risk_level,
+                "border_color": border_color
+            })
+            
+            highlight_html = f'''<span class="risk-highlight-wrapper"><label for="{checkbox_id}" class="risk-mark-label"><mark class="risk-mark" style="background: {bg_color}; border-bottom: 3px solid {border_color}; padding: 2px 4px; border-radius: 4px; cursor: pointer;">{safe_original}<sup style="background: {border_color}; color: white; padding: 1px 6px; border-radius: 8px; font-size: 0.7rem; margin-left: 3px; font-weight: 600;">{emoji}</sup></mark></label><span class="risk-tooltip"><div class="tooltip-header">{emoji} {label}</div><div class="tooltip-content">{safe_summary}</div><div class="tooltip-hint">클릭하면 상세 정보를 볼 수 있어요</div></span></span>'''
             
             highlighted = highlighted.replace(safe_original, highlight_html, 1)
     
-    return highlighted
+    modals_html = generate_css_modals_html(modal_data_list)
+    
+    return highlighted + modals_html
+
+
+def generate_css_modals_html(modal_data_list: list) -> str:
+    """Generate pure CSS modal HTML using checkbox hack."""
+    modals = ""
+    for data in modal_data_list:
+        modals += f'''
+<input type="checkbox" id="{data['checkbox_id']}" class="modal-toggle" />
+<div class="css-modal-overlay">
+    <label for="{data['checkbox_id']}" class="modal-overlay-bg"></label>
+    <div class="modal-content">
+        <div class="modal-header">
+            <div class="modal-title">
+                <span class="risk-badge {data['risk_level']}">{data['emoji']} {data['label']}</span>
+                {data['summary']}
+            </div>
+            <label for="{data['checkbox_id']}" class="modal-close">&times;</label>
+        </div>
+        <div class="modal-body">
+            <div class="modal-section">
+                <div class="modal-section-title">📍 해당 조항</div>
+                <div class="modal-section-content modal-original-text">"{data['original']}"</div>
+            </div>
+            <div class="modal-section">
+                <div class="modal-section-title">💡 왜 문제가 될 수 있나요?</div>
+                <div class="modal-section-content">{data['explanation']}</div>
+            </div>
+            <div class="modal-section">
+                <div class="modal-section-title">📚 법적 근거</div>
+                <div class="modal-section-content modal-legal-ref">
+                    <strong>{data['legal_ref']}</strong><br><br>
+                    {data['legal_article']}
+                </div>
+            </div>
+            <div class="modal-section">
+                <div class="modal-section-title">💬 이렇게 말해보세요</div>
+                <div class="modal-section-content modal-script">"{data['script']}"</div>
+            </div>
+        </div>
+    </div>
+</div>'''
+    return modals
+
+
+def generate_modals_html(modal_data_list: list) -> str:
+    """Generate modal HTML for each risk clause."""
+    modals = ""
+    for data in modal_data_list:
+        modals += f'''
+<div id="{data['id']}" class="modal-overlay" onclick="closeModalOnOverlay(event, '{data['id']}')">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <div class="modal-header">
+            <div class="modal-title">
+                <span class="risk-badge {data['risk_level']}">{data['emoji']} {data['label']}</span>
+                {data['summary']}
+            </div>
+            <button class="modal-close" onclick="closeRiskModal('{data['id']}')">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="modal-section">
+                <div class="modal-section-title">📍 해당 조항</div>
+                <div class="modal-section-content modal-original-text">"{data['original']}"</div>
+            </div>
+            <div class="modal-section">
+                <div class="modal-section-title">💡 왜 문제가 될 수 있나요?</div>
+                <div class="modal-section-content">{data['explanation']}</div>
+            </div>
+            <div class="modal-section">
+                <div class="modal-section-title">📚 법적 근거</div>
+                <div class="modal-section-content modal-legal-ref">
+                    <strong>{data['legal_ref']}</strong><br><br>
+                    {data['legal_article']}
+                </div>
+            </div>
+            <div class="modal-section">
+                <div class="modal-section-title">💬 이렇게 말해보세요</div>
+                <div class="modal-section-content modal-script">"{data['script']}"</div>
+            </div>
+        </div>
+    </div>
+</div>'''
+    return modals
+
+
+def generate_modal_script() -> str:
+    """Generate JavaScript for modal open/close functionality.
+    Note: This returns empty string as Streamlit strips inline scripts.
+    The actual script needs to be injected via st.components.v1.html()
+    """
+    return ""
+
+
+def get_modal_javascript() -> str:
+    """Return the JavaScript code that needs to be injected via st.components.v1.html()"""
+    return '''
+<script>
+window.openRiskModal = function(modalId) {
+    const modal = window.parent.document.getElementById(modalId);
+    if (modal) {
+        modal.classList.add('active');
+        window.parent.document.body.style.overflow = 'hidden';
+    }
+};
+
+window.closeRiskModal = function(modalId) {
+    const modal = window.parent.document.getElementById(modalId);
+    if (modal) {
+        modal.classList.remove('active');
+        window.parent.document.body.style.overflow = '';
+    }
+};
+
+window.parent.document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        const modals = window.parent.document.querySelectorAll('.modal-overlay.active');
+        modals.forEach(function(modal) {
+            modal.classList.remove('active');
+        });
+        window.parent.document.body.style.overflow = '';
+    }
+});
+</script>
+'''
 
 
 def generate_annotation_cards(risk_clauses: list[RiskClause]) -> str:

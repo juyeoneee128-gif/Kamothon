@@ -1,0 +1,72 @@
+We want to implement the final UI/UX direction for the service 
+"계약서 리스크 하이라이터 (Contract Risk Highlighter)".
+
+🎯 Core Experience Goal:
+Users must understand risky clauses directly ON the contract text, 
+and only open a deeper report IF they want more information.
+
+=========================
+UI/UX Requirements
+=========================
+
+1) Inline Highlight First (Document-Centered Design)
+- Extracted contract text should be the main view
+- Risky clauses should be highlighted with color coding:
+    🔴 High Risk / 🟡 Moderate Issue / 🟢 Safe
+- Hover or tap on each highlighted text shows quick tooltip:
+    • 1-line reason why it's risky
+
+2) Progressive Disclosure
+- Do NOT show all details at once in a separate panel
+- Instead add a floating button:
+    “🗣 전체 리포트 보기 / 이렇게 말해보세요”
+- Clicking opens a modal/slide-in panel WITH:
+    A) Grouped risky clauses by category (wage, rest, termination, etc.)
+    B) Legal basis & supporting explanation
+    C) Communication script for each problematic clause:
+        Example: “해당 조항은 근로기준법 제○조에 따라 수정 요청드립니다.”
+    D) Option in future to export/share (placeholder OK)
+
+3) Mobile-First Behavior
+- Text highlight tap triggers tooltip (no hover)
+- Bottom CTA persistent “전체 리포트” button on phones
+
+4) Emotional & Trust Design Principle
+- Tone: Friendly but reliable — we are here to help, not scare
+- Keep spacing wide and layout simple
+- Reduce user cognitive load but keep the credibility of a legal tool
+
+=========================
+UI Structure Summary
+=========================
+
+Main Screen:
+- Upload Contract
+- Extract → Show text with inline highlights
+- Hover/Tap = quick guidance
+- Sticky CTA (bottom): “상세 리포트 보기”
+
+Report Screen (Modal or Slide Panel):
+- Detailed legal advice
+- Grouping by labor law categories
+- Copy-ready negotiation scripts
+
+=========================
+Outcome
+=========================
+The user should:
+✔ See immediately where problems are in the document
+✔ Understand why with a tiny action
+✔ Get actionable language only when they choose to view deeper details
+
+=========================
+First Implementation Step
+=========================
+Please implement:
+- The inline highlight interaction
+- Hover/tap tooltip
+- Placeholder modal for detailed results
+- Layout separation based on this structure
+
+Visual polish and content population will follow afterward.
+

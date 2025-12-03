@@ -436,6 +436,250 @@ st.markdown("""
         font-size: 0.8rem;
         margin-top: 2rem;
     }
+    
+    /* Tooltip container for highlighted text */
+    .risk-highlight-wrapper {
+        position: relative;
+        display: inline;
+    }
+    
+    .risk-mark {
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    
+    .risk-mark:hover {
+        filter: brightness(0.95);
+        transform: scale(1.01);
+    }
+    
+    /* Tooltip box - appears on hover like the memo image */
+    .risk-tooltip {
+        position: absolute;
+        left: 100%;
+        top: -10px;
+        margin-left: 12px;
+        background: white;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 12px 16px;
+        min-width: 200px;
+        max-width: 280px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        z-index: 1000;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.2s ease, visibility 0.2s ease;
+        pointer-events: none;
+    }
+    
+    .risk-tooltip::before {
+        content: '';
+        position: absolute;
+        left: -8px;
+        top: 16px;
+        border: 8px solid transparent;
+        border-right-color: white;
+        filter: drop-shadow(-2px 0 1px rgba(0,0,0,0.1));
+    }
+    
+    .risk-highlight-wrapper:hover .risk-tooltip {
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
+    }
+    
+    .tooltip-header {
+        font-weight: 700;
+        font-size: 0.85rem;
+        color: #333;
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+    
+    .tooltip-content {
+        font-size: 0.85rem;
+        color: #555;
+        line-height: 1.5;
+    }
+    
+    .tooltip-hint {
+        font-size: 0.75rem;
+        color: #0097A7;
+        margin-top: 10px;
+        padding-top: 8px;
+        border-top: 1px solid #eee;
+    }
+    
+    /* Pure CSS Modal with checkbox hack */
+    .modal-toggle {
+        display: none;
+    }
+    
+    .css-modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 9999;
+        display: none;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .modal-toggle:checked + .css-modal-overlay {
+        display: flex;
+    }
+    
+    .modal-overlay-bg {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(2px);
+        cursor: pointer;
+    }
+    
+    .risk-mark-label {
+        cursor: pointer;
+    }
+    
+    /* Modal content box */
+    .modal-content {
+        position: relative;
+        z-index: 10000;
+        background: white;
+        border-radius: 16px;
+        max-width: 550px;
+        width: 90%;
+        max-height: 85vh;
+        overflow-y: auto;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        animation: modalSlideIn 0.3s ease;
+    }
+    
+    @keyframes modalSlideIn {
+        from {
+            opacity: 0;
+            transform: translateY(-20px) scale(0.95);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+    
+    .modal-header {
+        padding: 20px 24px;
+        border-bottom: 1px solid #eee;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .modal-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #333;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .modal-close {
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        cursor: pointer;
+        color: #888;
+        padding: 4px 8px;
+        border-radius: 8px;
+        transition: all 0.2s;
+    }
+    
+    .modal-close:hover {
+        background: #f5f5f5;
+        color: #333;
+    }
+    
+    .modal-body {
+        padding: 24px;
+    }
+    
+    .modal-section {
+        margin-bottom: 20px;
+    }
+    
+    .modal-section:last-child {
+        margin-bottom: 0;
+    }
+    
+    .modal-section-title {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #0097A7;
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+    
+    .modal-section-content {
+        font-size: 0.95rem;
+        color: #444;
+        line-height: 1.7;
+        background: #f8f9fa;
+        padding: 12px 16px;
+        border-radius: 8px;
+    }
+    
+    .modal-original-text {
+        background: #FFF9C4;
+        border-left: 4px solid #FFA726;
+        padding: 12px 16px;
+        border-radius: 0 8px 8px 0;
+        font-style: italic;
+    }
+    
+    .modal-legal-ref {
+        background: #E3F2FD;
+        border-left: 4px solid #2196F3;
+    }
+    
+    .modal-script {
+        background: #E8F5E9;
+        border-left: 4px solid #4CAF50;
+    }
+    
+    .risk-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+    
+    .risk-badge.high {
+        background: #FFCDD2;
+        color: #C62828;
+    }
+    
+    .risk-badge.medium {
+        background: #FFE0B2;
+        color: #E65100;
+    }
+    
+    .risk-badge.low {
+        background: #C8E6C9;
+        color: #2E7D32;
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -557,8 +801,8 @@ else:
     if result.risk_clauses and len(result.risk_clauses) > 0:
         st.markdown("""
         <div class="instruction-hint">
-            💡 <strong>색칠된 부분에 마우스를 올리면</strong> 간단한 설명이 나타나요.<br>
-            아래 카드를 <strong>클릭하면</strong> 상세 정보를 확인할 수 있어요!
+            💡 <strong>색칠된 부분에 마우스를 올리면</strong> 오른쪽에 메모가 나타나요.<br>
+            <strong>클릭하면</strong> 상세 정보 팝업이 열립니다!
         </div>
         """, unsafe_allow_html=True)
     
