@@ -771,20 +771,6 @@ else:
         </div>
         """, unsafe_allow_html=True)
     
-    if result.missing_clauses and len(result.missing_clauses) > 0:
-        missing_items = "".join([f'<div class="missing-item">{clause}</div>' for clause in result.missing_clauses])
-        st.markdown(f"""
-        <div class="missing-section">
-            <div class="missing-header">
-                <span class="missing-icon">⚠</span>
-                <span class="missing-title">계약서에서 찾지 못한 중요 조항</span>
-            </div>
-            <div class="missing-list">
-                {missing_items}
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
-    
     st.markdown("""
     <div class="risk-legend">
         <div class="legend-item"><span class="legend-dot high"></span> 위험</div>
@@ -823,6 +809,20 @@ else:
             <strong>🎉 좋은 소식이에요!</strong><br>
             특별히 위험해 보이는 조항이 발견되지 않았어요.<br>
             그래도 서명 전에 모든 내용을 꼼꼼히 읽어보세요!
+        </div>
+        """, unsafe_allow_html=True)
+    
+    if result.missing_clauses and len(result.missing_clauses) > 0:
+        missing_items = "".join([f'<div class="missing-item">{clause}</div>' for clause in result.missing_clauses])
+        st.markdown(f"""
+        <div class="missing-section">
+            <div class="missing-header">
+                <span class="missing-icon">⚠</span>
+                <span class="missing-title">계약서에서 찾지 못한 중요 조항</span>
+            </div>
+            <div class="missing-list">
+                {missing_items}
+            </div>
         </div>
         """, unsafe_allow_html=True)
     
