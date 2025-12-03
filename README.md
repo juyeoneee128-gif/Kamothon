@@ -63,7 +63,7 @@
 
 | Category | Tech |
 |---|---|
-| Vision LLM | **Gemini 1.5 Pro** |
+| Vision LLM | **Gemini 2.5 Pro** |
 | RAG | FAISS / Vector Store |
 | Frontend | **Streamlit (Replit)** |
 | Backend | Python |
