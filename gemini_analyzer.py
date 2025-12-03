@@ -2,13 +2,16 @@ import os
 import json
 import logging
 from typing import Optional
-from dataclasses import dataclass
 
 from google import genai
 from google.genai import types
 from pydantic import BaseModel
 
-client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY"))
+api_key = os.environ.get("GEMINI_API_KEY")
+if not api_key:
+    raise EnvironmentError("GEMINI_API_KEY 환경 변수가 설정되지 않았습니다. Secrets에서 API 키를 설정해주세요.")
+
+client = genai.Client(api_key=api_key)
 
 class RiskClause(BaseModel):
     clause_text: str
