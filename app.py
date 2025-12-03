@@ -607,6 +607,23 @@ st.markdown("""
         font-weight: 500;
     }
     
+    /* Hide file name after upload */
+    [data-testid="stFileUploaderFile"] {
+        display: none !important;
+    }
+    
+    /* Cancel button styling */
+    .stButton button[kind="secondary"] {
+        background: var(--bg-subtle) !important;
+        border: 1px solid var(--border-color) !important;
+        color: var(--text-tertiary) !important;
+        font-weight: 600 !important;
+    }
+    .stButton button[kind="secondary"]:hover {
+        background: var(--border-color) !important;
+        color: var(--text-primary) !important;
+    }
+    
     /* ===== MISC ===== */
     .uploaded-preview {
         max-width: 720px;
@@ -745,9 +762,17 @@ if not st.session_state.analysis_complete:
     else:
         st.session_state.uploaded_image = uploaded_file
         
-        st.markdown('<div class="analyze-button-container">', unsafe_allow_html=True)
+        col1, col2 = st.columns([5, 1])
+        with col1:
+            analyze_clicked = st.button("🔍 계약서 분석하기", type="primary", use_container_width=True)
+        with col2:
+            cancel_clicked = st.button("✕", use_container_width=True, help="업로드 취소")
         
-        if st.button("🔍 계약서 분석하기", type="primary", use_container_width=True):
+        if cancel_clicked:
+            st.session_state.uploaded_image = None
+            st.rerun()
+        
+        if analyze_clicked:
             with st.spinner("AI가 계약서를 읽고 분석하고 있어요... 잠시만요! 📖"):
                 try:
                     from gemini_analyzer import analyze_contract_image
@@ -770,8 +795,6 @@ if not st.session_state.analysis_complete:
                     st.session_state.analysis_complete = False
                     
             st.rerun()
-        
-        st.markdown('</div>', unsafe_allow_html=True)
         
         st.markdown('<div class="uploaded-preview">', unsafe_allow_html=True)
         image = Image.open(uploaded_file)
