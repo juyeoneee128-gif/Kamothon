@@ -320,6 +320,92 @@ st.markdown("""
         line-height: 1.6;
     }
     
+    /* Style Streamlit file uploader as big dropzone */
+    [data-testid="stFileUploader"] {
+        max-width: 800px !important;
+        margin: 0 auto !important;
+    }
+    [data-testid="stFileUploader"] > div:first-child {
+        display: none !important;
+    }
+    [data-testid="stFileUploader"] section {
+        background: #E8E8E8 !important;
+        border: none !important;
+        border-radius: 24px !important;
+        min-height: 420px !important;
+        padding: 2rem !important;
+        transition: background 0.3s ease !important;
+    }
+    [data-testid="stFileUploader"] section:hover {
+        background: #DEDEDE !important;
+    }
+    [data-testid="stFileUploaderDropzone"] {
+        background: transparent !important;
+        border: none !important;
+        min-height: 380px !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+    [data-testid="stFileUploaderDropzoneInstructions"] {
+        display: none !important;
+    }
+    [data-testid="stFileUploaderDropzone"] > div:first-child {
+        display: none !important;
+    }
+    [data-testid="stFileUploaderDropzone"] span,
+    [data-testid="stFileUploaderDropzone"] small {
+        display: none !important;
+    }
+    [data-testid="stFileUploader"] small {
+        display: none !important;
+    }
+    [data-testid="stFileUploader"] button {
+        display: none !important;
+    }
+    
+    /* Hide upload visual since we're styling the uploader content directly */
+    .upload-visual {
+        display: none;
+    }
+    
+    /* Custom content inside the dropzone */
+    [data-testid="stFileUploaderDropzone"]::before {
+        content: '';
+        display: block;
+        width: 56px;
+        height: 56px;
+        background: #333 url("data:image/svg+xml,%3Csvg width='24' height='24' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M12 4L12 16M12 4L7 9M12 4L17 9' stroke='white' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M4 17L4 18C4 19.1046 4.89543 20 6 20L18 20C19.1046 20 20 19.1046 20 18L20 17' stroke='white' stroke-width='2.5' stroke-linecap='round'/%3E%3C/svg%3E") center/24px no-repeat;
+        border-radius: 50%;
+        margin-bottom: 1.5rem;
+    }
+    
+    [data-testid="stFileUploaderDropzone"]::after {
+        content: '파일을 선택하거나 여기로 끌어다\A놓으세요.';
+        white-space: pre-wrap;
+        font-size: 1.15rem;
+        color: #333;
+        text-align: center;
+        line-height: 1.7;
+        font-weight: 400;
+    }
+    
+    /* Uploaded image preview */
+    .uploaded-preview {
+        max-width: 800px;
+        margin: 0 auto 1.5rem auto;
+        background: white;
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    }
+    
+    .analyze-button-container {
+        max-width: 400px;
+        margin: 0 auto;
+    }
+    
     .no-risks-banner {
         background: linear-gradient(135deg, #E8F5E9 0%, #C8E6C9 100%);
         border-radius: 12px;
@@ -379,65 +465,55 @@ def get_mime_type(filename: str) -> str:
     return mime_types.get(ext, 'image/jpeg')
 
 if not st.session_state.analysis_complete:
-    col1, col2, col3 = st.columns([1, 2, 1])
-    with col2:
+    uploaded_file = st.file_uploader(
+        "계약서 이미지 선택",
+        type=['png', 'jpg', 'jpeg'],
+        help="계약서 사진을 드래그하거나 클릭해서 업로드하세요",
+        label_visibility="collapsed",
+        key="contract_uploader"
+    )
+    
+    if uploaded_file is None:
         st.markdown("""
-        <div class="card">
-            <div class="step-header">
-                <span class="step-badge">1</span>
-                계약서 사진을 올려주세요
-            </div>
-            <p class="friendly-text">
-            📸 계약서 사진이나 스캔본을 올려주시면<br>
-            AI가 위험한 부분을 직접 표시해드려요!
-            </p>
+        <div style="text-align: center; max-width: 800px; margin: 0 auto;">
+            <span class="privacy-badge">🔒 이미지는 분석 후 즉시 삭제됩니다</span>
+        </div>
         """, unsafe_allow_html=True)
+    else:
+        st.session_state.uploaded_image = uploaded_file
         
-        uploaded_file = st.file_uploader(
-            "계약서 이미지 선택",
-            type=['png', 'jpg', 'jpeg'],
-            help="계약서 사진을 드래그하거나 클릭해서 업로드하세요",
-            label_visibility="collapsed"
-        )
+        st.markdown('<div class="uploaded-preview">', unsafe_allow_html=True)
+        image = Image.open(uploaded_file)
+        st.image(image, caption="📋 업로드된 계약서", use_container_width=True)
+        st.markdown('</div>', unsafe_allow_html=True)
         
-        if uploaded_file is not None:
-            st.session_state.uploaded_image = uploaded_file
-            image = Image.open(uploaded_file)
-            st.image(image, caption="📋 업로드된 계약서", use_container_width=True)
-            
-            st.markdown("""
-            <div class="privacy-badge">
-                🔒 이미지는 분석 후 즉시 삭제됩니다
-            </div>
-            """, unsafe_allow_html=True)
-            
-            st.markdown("<br>", unsafe_allow_html=True)
-            
-            if st.button("🔍 계약서 분석하기", type="primary", use_container_width=True):
-                with st.spinner("AI가 계약서를 읽고 분석하고 있어요... 잠시만요! 📖"):
-                    try:
-                        from gemini_analyzer import analyze_contract_image
-                        
-                        uploaded_file.seek(0)
-                        image_bytes = uploaded_file.read()
-                        mime_type = get_mime_type(uploaded_file.name)
-                        
-                        result = analyze_contract_image(image_bytes, mime_type)
-                        
-                        if result:
-                            st.session_state.analysis_result = result
-                            st.session_state.analysis_complete = True
-                            st.session_state.analysis_error = None
-                        else:
-                            st.session_state.analysis_error = "분석 결과를 받지 못했어요. 다시 시도해주세요!"
-                            
-                    except Exception as e:
-                        st.session_state.analysis_error = str(e)
-                        st.session_state.analysis_complete = False
-                        
-                st.rerun()
+        st.markdown('<div class="analyze-button-container">', unsafe_allow_html=True)
         
-        st.markdown("</div>", unsafe_allow_html=True)
+        if st.button("🔍 계약서 분석하기", type="primary", use_container_width=True):
+            with st.spinner("AI가 계약서를 읽고 분석하고 있어요... 잠시만요! 📖"):
+                try:
+                    from gemini_analyzer import analyze_contract_image
+                    
+                    uploaded_file.seek(0)
+                    image_bytes = uploaded_file.read()
+                    mime_type = get_mime_type(uploaded_file.name)
+                    
+                    result = analyze_contract_image(image_bytes, mime_type)
+                    
+                    if result:
+                        st.session_state.analysis_result = result
+                        st.session_state.analysis_complete = True
+                        st.session_state.analysis_error = None
+                    else:
+                        st.session_state.analysis_error = "분석 결과를 받지 못했어요. 다시 시도해주세요!"
+                        
+                except Exception as e:
+                    st.session_state.analysis_error = str(e)
+                    st.session_state.analysis_complete = False
+                    
+            st.rerun()
+        
+        st.markdown('</div>', unsafe_allow_html=True)
         
         if st.session_state.analysis_error:
             st.error(f"😥 {st.session_state.analysis_error}")
