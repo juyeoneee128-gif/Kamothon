@@ -5,3 +5,10 @@ chromadb
 python-dotenv
 pypdf
 unstructured
+chromadb
+google-generativeai
+langchain
+pypdf
+python-dotenv
+streamlit
+unstructured
