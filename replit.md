@@ -99,12 +99,17 @@ ContractAnalysisResult:
 
 ## Recent Changes
 - **2024-12-03**: 
+  - Complete UI/UX redesign with warm, friendly brand identity
+  - New color palette: Mint + Blue Green (#0097A7, #00BCD4, #F6FAFB)
+  - Added gradient brand header with visual identity
+  - Implemented 3-step flow indicator (Upload → AI → Scripts)
+  - Friendly Korean copywriting for young workers
+  - Rounded corners, soft shadows, polished spacing
+  - Added footer with benefits micro-copy
   - Implemented Gemini Vision contract analysis
   - Created gemini_analyzer.py with structured response
-  - Updated app.py to display dynamic analysis results
   - Added color-coded risk display (danger-box, warning-box)
   - Added privacy messaging
-  - Cleaned up requirements.txt
 
 ## Future Improvements
 1. RAG integration with 근로기준법 database
