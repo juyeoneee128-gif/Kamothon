@@ -671,6 +671,10 @@ st.markdown("""
         margin: 0 auto 1rem auto;
     }
     
+    .hide-uploader [data-testid="stFileUploader"] {
+        display: none !important;
+    }
+    
     .no-risks-banner {
         max-width: 720px;
         margin: 1rem auto;
@@ -792,6 +796,8 @@ if not st.session_state.analysis_complete:
         """, unsafe_allow_html=True)
     else:
         st.session_state.uploaded_image = uploaded_file
+        
+        st.markdown('<style>[data-testid="stFileUploader"] { display: none !important; }</style>', unsafe_allow_html=True)
         
         st.markdown('<div class="analyze-button-container">', unsafe_allow_html=True)
         analyze_clicked = st.button("🔍 계약서 분석하기", type="primary", use_container_width=True)
