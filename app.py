@@ -624,6 +624,139 @@ st.markdown("""
         color: var(--text-primary) !important;
     }
     
+    /* ===== MULTI-IMAGE UPLOAD GRID ===== */
+    .upload-grid-container {
+        max-width: 500px;
+        margin: 0 auto 1.5rem auto;
+        padding: 0 1rem;
+    }
+    
+    .upload-count {
+        text-align: right;
+        color: var(--text-muted);
+        font-size: 0.85rem;
+        margin-bottom: 0.75rem;
+    }
+    
+    .upload-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.5rem;
+    }
+    
+    .upload-item {
+        position: relative;
+        aspect-ratio: 1;
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-md);
+        overflow: hidden;
+    }
+    
+    .upload-item img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    
+    .upload-item .remove-btn {
+        position: absolute;
+        top: 4px;
+        left: 4px;
+        width: 22px;
+        height: 22px;
+        background: rgba(0,0,0,0.5);
+        border: none;
+        border-radius: 50%;
+        color: white;
+        font-size: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10;
+    }
+    
+    .upload-add-slot {
+        aspect-ratio: 1;
+        background: var(--bg-subtle);
+        border: 2px dashed var(--border-color);
+        border-radius: var(--radius-md);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: var(--transition);
+    }
+    
+    .upload-add-slot:hover {
+        border-color: var(--accent-yellow);
+        background: #FFFEF5;
+    }
+    
+    .upload-add-icon {
+        width: 40px;
+        height: 40px;
+        border: 2px solid var(--border-color);
+        border-radius: var(--radius-sm);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--text-muted);
+        background: var(--bg-card);
+    }
+    
+    /* Style file uploader as grid slot */
+    .uploader-slot {
+        max-width: 150px;
+    }
+    
+    .uploader-slot [data-testid="stFileUploader"] {
+        background: transparent !important;
+    }
+    
+    .uploader-slot [data-testid="stFileUploader"] section {
+        background: var(--bg-subtle) !important;
+        border: 2px dashed var(--border-color) !important;
+        border-radius: var(--radius-md) !important;
+        padding: 1.5rem 1rem !important;
+        min-height: 120px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .uploader-slot [data-testid="stFileUploader"] section:hover {
+        border-color: var(--accent-yellow) !important;
+        background: #FFFEF5 !important;
+    }
+    
+    .uploader-slot [data-testid="stFileUploader"] section > div > div:first-child {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .uploader-slot [data-testid="stFileUploader"] p {
+        font-size: 0.75rem !important;
+        color: var(--text-muted) !important;
+    }
+    
+    .uploader-slot [data-testid="stFileUploaderDropzone"] button {
+        display: none !important;
+    }
+    
+    /* Hide remove buttons row */
+    .remove-buttons-row {
+        display: none;
+    }
+    
+    .analyze-button-container {
+        max-width: 200px;
+        margin: 1rem auto;
+    }
+    
     /* ===== MISC ===== */
     .uploaded-preview {
         position: relative;
@@ -634,45 +767,6 @@ st.markdown("""
         border-radius: var(--radius-lg);
         padding: 1.5rem;
         box-shadow: var(--shadow-sm);
-    }
-    
-    .uploaded-preview > div:first-child {
-        position: absolute !important;
-        top: 0.5rem;
-        right: 0.5rem;
-        z-index: 10;
-        width: auto !important;
-    }
-    
-    .uploaded-preview > div:first-child button {
-        width: 28px !important;
-        height: 28px !important;
-        min-width: 28px !important;
-        min-height: 28px !important;
-        padding: 0 !important;
-        background: rgba(0,0,0,0.6) !important;
-        border: none !important;
-        border-radius: 50% !important;
-        color: white !important;
-        font-size: 0.9rem !important;
-        line-height: 1 !important;
-    }
-    
-    .uploaded-preview > div:first-child button:hover {
-        background: rgba(0,0,0,0.8) !important;
-    }
-    
-    .uploaded-preview > div:first-child p {
-        display: none !important;
-    }
-    
-    .analyze-button-container {
-        max-width: 240px;
-        margin: 0 auto 1rem auto;
-    }
-    
-    .hide-uploader [data-testid="stFileUploader"] {
-        display: none !important;
     }
     
     .no-risks-banner {
@@ -759,12 +853,14 @@ from gemini_analyzer import DEMO_MODE, get_demo_result
 
 if 'analysis_complete' not in st.session_state:
     st.session_state.analysis_complete = False
-if 'uploaded_image' not in st.session_state:
-    st.session_state.uploaded_image = None
+if 'uploaded_images' not in st.session_state:
+    st.session_state.uploaded_images = []
 if 'analysis_result' not in st.session_state:
     st.session_state.analysis_result = None
 if 'analysis_error' not in st.session_state:
     st.session_state.analysis_error = None
+
+MAX_IMAGES = 10
 
 def get_mime_type(filename: str) -> str:
     ext = filename.lower().split('.')[-1]
@@ -775,29 +871,64 @@ def get_mime_type(filename: str) -> str:
     }
     return mime_types.get(ext, 'image/jpeg')
 
+def image_to_base64(image_bytes):
+    import base64
+    return base64.b64encode(image_bytes).decode()
+
 if DEMO_MODE:
     st.session_state.analysis_result = get_demo_result()
     st.session_state.analysis_complete = True
 
 if not st.session_state.analysis_complete:
-    uploaded_file = st.file_uploader(
+    st.markdown('<div class="hidden-uploader">', unsafe_allow_html=True)
+    uploaded_files = st.file_uploader(
         "계약서 이미지 선택",
         type=['png', 'jpg', 'jpeg'],
-        help="계약서 사진을 드래그하거나 클릭해서 업로드하세요",
+        accept_multiple_files=True,
+        help="계약서 사진을 드래그하거나 클릭해서 업로드하세요 (최대 10장)",
         label_visibility="collapsed",
         key="contract_uploader"
     )
+    st.markdown('</div>', unsafe_allow_html=True)
     
-    if uploaded_file is None:
-        st.markdown("""
-        <div style="text-align: center; max-width: 800px; margin: 0 auto;">
-            <span class="privacy-badge">🔒 이미지는 분석 후 즉시 삭제됩니다</span>
-        </div>
-        """, unsafe_allow_html=True)
-    else:
-        st.session_state.uploaded_image = uploaded_file
+    if uploaded_files:
+        for uf in uploaded_files:
+            uf.seek(0)
+            img_bytes = uf.read()
+            exists = any(img['name'] == uf.name and img['size'] == len(img_bytes) for img in st.session_state.uploaded_images)
+            if not exists and len(st.session_state.uploaded_images) < MAX_IMAGES:
+                st.session_state.uploaded_images.append({
+                    'name': uf.name,
+                    'bytes': img_bytes,
+                    'size': len(img_bytes)
+                })
+    
+    num_images = len(st.session_state.uploaded_images)
+    
+    grid_items_html = ""
+    for idx, img_data in enumerate(st.session_state.uploaded_images):
+        img_b64 = image_to_base64(img_data['bytes'])
+        mime = get_mime_type(img_data['name'])
+        grid_items_html += f'<div class="upload-item"><img src="data:{mime};base64,{img_b64}" alt="img"></div>'
+    
+    if num_images < MAX_IMAGES:
+        grid_items_html += '<div class="upload-add-slot"><div class="upload-add-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div></div>'
+    
+    st.markdown(f'<div class="upload-grid-container"><div class="upload-count">{num_images}/{MAX_IMAGES}</div><div class="upload-grid">{grid_items_html}</div></div>', unsafe_allow_html=True)
+    
+    if num_images > 0:
+        st.markdown('<div class="remove-buttons-row">', unsafe_allow_html=True)
+        remove_cols = st.columns(num_images)
+        remove_idx = None
+        for idx in range(num_images):
+            with remove_cols[idx]:
+                if st.button(f"삭제 {idx+1}", key=f"remove_{idx}"):
+                    remove_idx = idx
+        st.markdown('</div>', unsafe_allow_html=True)
         
-        st.markdown('<style>[data-testid="stFileUploader"] { display: none !important; }</style>', unsafe_allow_html=True)
+        if remove_idx is not None:
+            st.session_state.uploaded_images.pop(remove_idx)
+            st.rerun()
         
         st.markdown('<div class="analyze-button-container">', unsafe_allow_html=True)
         analyze_clicked = st.button("🔍 계약서 분석하기", type="primary", use_container_width=True)
@@ -806,13 +937,10 @@ if not st.session_state.analysis_complete:
         if analyze_clicked:
             with st.spinner("AI가 계약서를 읽고 분석하고 있어요... 잠시만요! 📖"):
                 try:
-                    from gemini_analyzer import analyze_contract_image
+                    from gemini_analyzer import analyze_contract_images
                     
-                    uploaded_file.seek(0)
-                    image_bytes = uploaded_file.read()
-                    mime_type = get_mime_type(uploaded_file.name)
-                    
-                    result = analyze_contract_image(image_bytes, mime_type)
+                    images_data = [(img['bytes'], get_mime_type(img['name'])) for img in st.session_state.uploaded_images]
+                    result = analyze_contract_images(images_data)
                     
                     if result:
                         st.session_state.analysis_result = result
@@ -827,22 +955,17 @@ if not st.session_state.analysis_complete:
                     
             st.rerun()
         
-        st.markdown('<div class="uploaded-preview">', unsafe_allow_html=True)
-        
-        cancel_clicked = st.button("✕", key="cancel_upload", help="업로드 취소")
-        if cancel_clicked:
-            st.session_state.uploaded_image = None
-            st.rerun()
-        
-        image = Image.open(uploaded_file)
-        st.image(image, use_container_width=True)
-        st.markdown('</div>', unsafe_allow_html=True)
-        
         if st.session_state.analysis_error:
             st.error(f"😥 {st.session_state.analysis_error}")
             if st.button("🔄 다시 시도하기"):
                 st.session_state.analysis_error = None
                 st.rerun()
+    
+    st.markdown("""
+    <div style="text-align: center; max-width: 800px; margin: 0 auto;">
+        <span class="privacy-badge">🔒 이미지는 분석 후 즉시 삭제됩니다</span>
+    </div>
+    """, unsafe_allow_html=True)
 
 else:
     result = st.session_state.analysis_result
@@ -919,7 +1042,7 @@ else:
     with col_btn2:
         if st.button("🔄 다른 계약서 분석하기", use_container_width=True):
             st.session_state.analysis_complete = False
-            st.session_state.uploaded_image = None
+            st.session_state.uploaded_images = []
             st.session_state.analysis_result = None
             st.session_state.analysis_error = None
             st.rerun()
