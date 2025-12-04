@@ -759,6 +759,24 @@ st.markdown("""
         margin-top: 0.75rem;
     }
     
+    .privacy-banner {
+        max-width: 720px;
+        margin: 0 auto 1.5rem auto;
+        background: #EFF6FF;
+        border: 1px solid #BFDBFE;
+        border-radius: 8px;
+        padding: 0.875rem 1.25rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: #1E40AF;
+        font-size: 0.9rem;
+    }
+    
+    .privacy-banner-icon {
+        font-size: 1rem;
+    }
+    
     .footer-mini {
         text-align: center;
         padding: 2rem 1rem;
@@ -807,6 +825,10 @@ st.markdown("""
     <div class="brand-subtitle">사회 초년생의 권리를 지키는 AI 기반 계약서 리스크 분석 서비스</div>
 </div>
 <div class="header-spacer"></div>
+<div class="privacy-banner">
+    <span class="privacy-banner-icon">🔒</span>
+    <span>개인 정보는 자동 마스킹됩니다.</span>
+</div>
 """, unsafe_allow_html=True)
 
 from gemini_analyzer import DEMO_MODE, get_demo_result
