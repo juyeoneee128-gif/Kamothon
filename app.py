@@ -863,7 +863,25 @@ if not st.session_state.analysis_complete:
         st.markdown('</div>', unsafe_allow_html=True)
         
         if analyze_clicked:
-            with st.spinner("AI가 계약서를 읽고 분석하고 있어요... 잠시만요! 📖"):
+            progress_messages = [
+                ("📄 계약서 이미지를 읽고 있어요...", 0.1),
+                ("🔍 텍스트를 추출하고 있어요...", 0.25),
+                ("⚖️ 근로기준법과 비교 분석 중이에요...", 0.45),
+                ("🚨 위험 조항을 찾고 있어요...", 0.65),
+                ("💬 협상 스크립트를 생성하고 있어요...", 0.85),
+                ("✨ 거의 다 됐어요!", 0.95),
+            ]
+            
+            status_container = st.empty()
+            progress_bar = st.progress(0)
+            
+            import time
+            import threading
+            
+            analysis_done = threading.Event()
+            analysis_result = {"result": None, "error": None}
+            
+            def run_analysis():
                 try:
                     from gemini_analyzer import analyze_contract_images
                     
@@ -880,17 +898,40 @@ if not st.session_state.analysis_complete:
                             image_data_list.append((file_bytes, mime_type))
                     
                     result = analyze_contract_images(image_data_list)
-                    
-                    if result:
-                        st.session_state.analysis_result = result
-                        st.session_state.analysis_complete = True
-                        st.session_state.analysis_error = None
-                    else:
-                        st.session_state.analysis_error = "분석 결과를 받지 못했어요. 다시 시도해주세요!"
-                        
+                    analysis_result["result"] = result
                 except Exception as e:
-                    st.session_state.analysis_error = str(e)
-                    st.session_state.analysis_complete = False
+                    analysis_result["error"] = str(e)
+                finally:
+                    analysis_done.set()
+            
+            thread = threading.Thread(target=run_analysis)
+            thread.start()
+            
+            msg_idx = 0
+            while not analysis_done.is_set():
+                if msg_idx < len(progress_messages):
+                    msg, progress = progress_messages[msg_idx]
+                    status_container.markdown(f'<p style="text-align:center; font-size:1rem; color: var(--text-secondary);">{msg}</p>', unsafe_allow_html=True)
+                    progress_bar.progress(progress)
+                    msg_idx += 1
+                time.sleep(2.5)
+            
+            progress_bar.progress(1.0)
+            status_container.markdown('<p style="text-align:center; font-size:1rem; color: var(--text-secondary);">✅ 분석 완료!</p>', unsafe_allow_html=True)
+            time.sleep(0.5)
+            
+            status_container.empty()
+            progress_bar.empty()
+            
+            if analysis_result["error"]:
+                st.session_state.analysis_error = analysis_result["error"]
+                st.session_state.analysis_complete = False
+            elif analysis_result["result"]:
+                st.session_state.analysis_result = analysis_result["result"]
+                st.session_state.analysis_complete = True
+                st.session_state.analysis_error = None
+            else:
+                st.session_state.analysis_error = "분석 결과를 받지 못했어요. 다시 시도해주세요!"
                     
             st.rerun()
         
