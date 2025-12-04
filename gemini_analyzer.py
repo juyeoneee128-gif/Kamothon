@@ -1,9 +1,22 @@
+from __future__ import annotations
+
 import os
 import json
 import logging
 from typing import Optional, List
 
 from pydantic import BaseModel
+
+# Vector DB imports (for chat_with_contract RAG system)
+try:
+    from langchain_community.document_loaders import PyPDFLoader
+    from langchain_text_splitters import RecursiveCharacterTextSplitter
+    from langchain_google_genai import GoogleGenerativeAIEmbeddings
+    from langchain_chroma import Chroma
+    VECTOR_DB_AVAILABLE = True
+except ImportError as e:
+    VECTOR_DB_AVAILABLE = False
+    logging.warning(f"Vector DB dependencies not available: {e}. Chat functionality will be limited.")
 
 DEMO_MODE = False
 
@@ -91,7 +104,7 @@ class ContractAnalysisResult(BaseModel):
 
 def get_demo_result() -> ContractAnalysisResult:
     """Return demo analysis result for testing without API calls."""
-    
+
     demo_extracted_text = """근로계약서
 
 1. 근로계약기간: 2024년 1월 1일 ~ 2024년 12월 31일
@@ -173,13 +186,13 @@ def get_demo_result() -> ContractAnalysisResult:
             negotiation_script="경업금지 조항이 있는데, 제가 하는 업무 수준에서 이 조항이 꼭 필요한지 여쭤봐도 될까요? 직업선택의 자유와 관련해서 조금 부담이 됩니다."
         )
     ]
-    
+
     demo_missing_clauses = [
         "연차휴가에 대한 규정이 없습니다 (근로기준법 제60조)",
         "연장근로수당에 대한 규정이 없습니다 (근로기준법 제56조)",
         "4대 보험 가입 여부가 명시되지 않았습니다"
     ]
-    
+
     return ContractAnalysisResult(
         extracted_text=demo_extracted_text,
         risk_clauses=demo_risk_clauses,
@@ -195,19 +208,19 @@ def analyze_contract_image(image_bytes: bytes, mime_type: str = "image/jpeg") ->
     1. Extract full text from the contract (OCR)
     2. Identify risky clauses with exact text for highlighting
     """
-    
+
     if DEMO_MODE:
         return get_demo_result()
-    
+
     from google import genai
     from google.genai import types
-    
+
     api_key = os.environ.get("GEMINI_API_KEY")
     if not api_key:
         raise EnvironmentError("GEMINI_API_KEY 환경 변수가 설정되지 않았습니다.")
-    
+
     client = genai.Client(api_key=api_key)
-    
+
     # 강행규정 데이터셋을 문자열로 포맷팅
     mandatory_ref = "\n".join([
         f"{i+1}. {clause['legal_reference']} - {clause['risk_pattern']}"
@@ -314,16 +327,16 @@ def analyze_contract_image(image_bytes: bytes, mime_type: str = "image/jpeg") ->
                 response_schema=ContractAnalysisResult,
             ),
         )
-        
+
         raw_json = response.text
         logging.info(f"Gemini response: {raw_json}")
-        
+
         if raw_json:
             data = json.loads(raw_json)
             return ContractAnalysisResult(**data)
         else:
             return None
-            
+
     except Exception as e:
         logging.error(f"Contract analysis failed: {e}")
         raise Exception(f"계약서 분석 중 오류가 발생했습니다: {e}")
@@ -333,24 +346,24 @@ def analyze_contract_images(image_data_list: list[tuple[bytes, str]]) -> Optiona
     """
     Analyze multiple contract images using Gemini Vision.
     Combines all pages into a single analysis.
-    
+
     Args:
         image_data_list: List of (image_bytes, mime_type) tuples
     """
-    
+
     if DEMO_MODE:
         return get_demo_result()
-    
+
     if len(image_data_list) == 1:
         return analyze_contract_image(image_data_list[0][0], image_data_list[0][1])
-    
+
     from google import genai
     from google.genai import types
-    
+
     api_key = os.environ.get("GEMINI_API_KEY")
     if not api_key:
         raise EnvironmentError("GEMINI_API_KEY 환경 변수가 설정되지 않았습니다.")
-    
+
     client = genai.Client(api_key=api_key)
 
     # 강행규정 데이터셋을 문자열로 포맷팅
@@ -452,9 +465,9 @@ def analyze_contract_images(image_data_list: list[tuple[bytes, str]]) -> Optiona
                     mime_type=mime_type,
                 )
             )
-        
+
         contents.append(system_prompt + f"\n\n위 {len(image_data_list)}장의 계약서 이미지를 분석해주세요.")
-        
+
         response = client.models.generate_content(
             model="gemini-2.5-pro",
             contents=contents,
@@ -464,16 +477,16 @@ def analyze_contract_images(image_data_list: list[tuple[bytes, str]]) -> Optiona
                 response_schema=ContractAnalysisResult,
             ),
         )
-        
+
         raw_json = response.text
         logging.info(f"Gemini response: {raw_json}")
-        
+
         if raw_json:
             data = json.loads(raw_json)
             return ContractAnalysisResult(**data)
         else:
             return None
-            
+
     except Exception as e:
         logging.error(f"Contract analysis failed: {e}")
         raise Exception(f"계약서 분석 중 오류가 발생했습니다: {e}")
@@ -527,30 +540,30 @@ def highlight_text_with_risks(extracted_text: str, risk_clauses: list[RiskClause
     - Modal popup on click with full details (pure CSS)
     """
     import html
-    
+
     safe_text = html.escape(extracted_text)
     highlighted = safe_text
-    
+
     modal_data_list = []
-    
+
     for idx, clause in enumerate(sorted(risk_clauses, key=lambda x: len(x.original_text), reverse=True), 1):
         safe_original = html.escape(clause.original_text)
-        
+
         if safe_original and safe_original in highlighted:
             bg_color = get_risk_color(clause.risk_level)
             border_color = get_risk_border_color(clause.risk_level)
             emoji = get_risk_emoji(clause.risk_level)
             label = get_risk_label(clause.risk_level)
-            
+
             safe_summary = html.escape(clause.issue_summary)
             safe_explanation = html.escape(clause.simple_explanation)
             safe_legal_ref = html.escape(clause.legal_reference)
             safe_legal_article = html.escape(clause.legal_article)
             safe_script = html.escape(clause.negotiation_script)
-            
+
             modal_id = f"risk-modal-{idx}"
             checkbox_id = f"modal-toggle-{idx}"
-            
+
             modal_data_list.append({
                 "id": modal_id,
                 "checkbox_id": checkbox_id,
@@ -565,11 +578,11 @@ def highlight_text_with_risks(extracted_text: str, risk_clauses: list[RiskClause
                 "risk_level": clause.risk_level,
                 "border_color": border_color
             })
-            
+
             highlight_html = f'''<span class="risk-highlight-wrapper"><label for="{checkbox_id}" class="risk-mark-label"><mark class="risk-mark" style="background: {bg_color}; border-bottom: 2px solid {border_color}; padding: 1px 2px; border-radius: 3px; cursor: pointer;">{safe_original}</mark></label><span class="risk-tooltip"><span class="tooltip-header"><span style="display:inline-block;width:8px;height:8px;background:{border_color};border-radius:50%;margin-right:6px;"></span>{label}</span><span class="tooltip-content">{safe_summary}</span><span class="tooltip-hint">클릭하여 상세 정보 확인</span></span></span>'''
-            
+
             highlighted = highlighted.replace(safe_original, highlight_html, 1)
-    
+
     return highlighted, modal_data_list
 
 
@@ -701,25 +714,25 @@ def generate_annotation_cards(risk_clauses: list[RiskClause]) -> str:
     These appear below the document as clickable cards.
     """
     import html
-    
+
     if not risk_clauses:
         return ""
-    
+
     cards_html = '<div class="annotation-cards">'
-    
+
     for idx, clause in enumerate(risk_clauses, 1):
         bg_color = get_risk_color(clause.risk_level)
         border_color = get_risk_border_color(clause.risk_level)
         emoji = get_risk_emoji(clause.risk_level)
         label = get_risk_label(clause.risk_level)
-        
+
         safe_original = html.escape(clause.original_text)
         safe_summary = html.escape(clause.issue_summary)
         safe_explanation = html.escape(clause.simple_explanation)
         safe_legal_ref = html.escape(clause.legal_reference)
         safe_legal_article = html.escape(clause.legal_article)
         safe_script = html.escape(clause.negotiation_script)
-        
+
         cards_html += f'''
 <details class="annotation-card" style="border-left: 4px solid {border_color};">
 <summary class="annotation-summary" style="background: {bg_color};">
@@ -748,6 +761,216 @@ def generate_annotation_cards(risk_clauses: list[RiskClause]) -> str:
 </div>
 </div>
 </details>'''
-    
+
     cards_html += '</div>'
     return cards_html
+
+
+# ============================================================
+# VECTOR DB FUNCTIONS (For chat_with_contract RAG system)
+# ============================================================
+
+def build_vector_db(data_folder: str = "./data", persist_directory: str = "./chroma_db") -> Optional[Chroma]:
+    """
+    Build ChromaDB vector database from PDF files in data folder.
+
+    Args:
+        data_folder: Path to folder containing PDF files
+        persist_directory: Path to persist the vector database
+
+    Returns:
+        Chroma vectorstore instance or None if build fails
+    """
+    if not VECTOR_DB_AVAILABLE:
+        logging.error("Vector DB dependencies not installed. Run: pip install langchain langchain-community langchain-google-genai langchain-chroma chromadb pypdf")
+        return None
+
+    api_key = os.environ.get("GEMINI_API_KEY")
+    if not api_key:
+        raise EnvironmentError("GEMINI_API_KEY 환경 변수가 설정되지 않았습니다.")
+
+    print(f"📂 Scanning PDF files in {data_folder}...")
+
+    # Get all PDF files
+    pdf_files = [f for f in os.listdir(data_folder) if f.endswith('.pdf')]
+
+    if not pdf_files:
+        print(f"❌ No PDF files found in {data_folder}")
+        return None
+
+    print(f"✅ Found {len(pdf_files)} PDF files")
+
+    # Load and split documents
+    all_documents = []
+    total_pages = 0
+
+    for pdf_file in pdf_files:
+        pdf_path = os.path.join(data_folder, pdf_file)
+        print(f"   📄 Loading {pdf_file}...")
+
+        try:
+            loader = PyPDFLoader(pdf_path)
+            documents = loader.load()
+            total_pages += len(documents)
+            all_documents.extend(documents)
+            print(f"      ✓ {len(documents)} pages loaded")
+        except Exception as e:
+            print(f"      ✗ Error loading {pdf_file}: {e}")
+            continue
+
+    if not all_documents:
+        print("❌ No documents loaded")
+        return None
+
+    print(f"\n📊 Total: {len(pdf_files)} files, {total_pages} pages")
+    print(f"🔪 Splitting documents into chunks...")
+
+    # Split documents into chunks
+    text_splitter = RecursiveCharacterTextSplitter(
+        chunk_size=1000,
+        chunk_overlap=200,
+        length_function=len,
+    )
+
+    splits = text_splitter.split_documents(all_documents)
+    print(f"✅ Created {len(splits)} chunks")
+
+    # Create embeddings and vector store
+    print(f"🧮 Creating embeddings with Gemini...")
+    embeddings = GoogleGenerativeAIEmbeddings(
+        model="models/embedding-001",
+        google_api_key=api_key
+    )
+
+    print(f"💾 Building ChromaDB vector store at {persist_directory}...")
+    vectorstore = Chroma.from_documents(
+        documents=splits,
+        embedding=embeddings,
+        persist_directory=persist_directory
+    )
+
+    print(f"✅ Vector DB built successfully!")
+    print(f"   📊 Files: {len(pdf_files)} | Pages: {total_pages} | Chunks: {len(splits)}")
+
+    return vectorstore
+
+
+def get_vector_store(persist_directory: str = "./chroma_db") -> Optional[Chroma]:
+    """
+    Load existing ChromaDB vector store.
+
+    Args:
+        persist_directory: Path to persisted vector database
+
+    Returns:
+        Chroma vectorstore instance or None if not found
+    """
+    if not VECTOR_DB_AVAILABLE:
+        logging.warning("Vector DB dependencies not available")
+        return None
+
+    if not os.path.exists(persist_directory):
+        logging.warning(f"Vector DB not found at {persist_directory}. Run build_db.py first.")
+        return None
+
+    api_key = os.environ.get("GEMINI_API_KEY")
+    if not api_key:
+        raise EnvironmentError("GEMINI_API_KEY 환경 변수가 설정되지 않았습니다.")
+
+    embeddings = GoogleGenerativeAIEmbeddings(
+        model="models/embedding-001",
+        google_api_key=api_key
+    )
+
+    vectorstore = Chroma(
+        persist_directory=persist_directory,
+        embedding_function=embeddings
+    )
+
+    return vectorstore
+
+
+def chat_with_contract(question: str, contract_text: str = "", use_rag: bool = True) -> dict:
+    """
+    RAG-based chat function for answering questions about labor law.
+
+    Args:
+        question: User's question
+        contract_text: Optional contract text for context
+        use_rag: Whether to use RAG (vector DB search) or direct answer
+
+    Returns:
+        dict with 'answer' and 'sources' keys
+    """
+    from google import genai
+    from google.genai import types
+
+    api_key = os.environ.get("GEMINI_API_KEY")
+    if not api_key:
+        raise EnvironmentError("GEMINI_API_KEY 환경 변수가 설정되지 않았습니다.")
+
+    client = genai.Client(api_key=api_key)
+
+    # Build context from RAG if enabled
+    context_sources = []
+    if use_rag and VECTOR_DB_AVAILABLE:
+        vectorstore = get_vector_store()
+        if vectorstore:
+            # Search for relevant documents
+            retriever = vectorstore.as_retriever(search_kwargs={"k": 3})
+            docs = retriever.get_relevant_documents(question)
+            context_sources = [doc.page_content for doc in docs]
+
+    # Build prompt
+    system_prompt = """당신은 한국 근로기준법 전문가입니다.
+사용자의 질문에 친절하고 정확하게 답변해주세요.
+
+답변 시:
+1. 관련 법조항을 명확히 인용하세요
+2. 쉬운 말로 설명하세요
+3. 실제 예시를 들어 설명하면 더 좋습니다
+
+답변 형식:
+📌 **핵심 답변**: (한 문장 요약)
+
+⚖️ **법적 근거**:
+(관련 법조항 인용)
+
+🗣️ **쉬운 설명**:
+(일반인이 이해하기 쉽게 풀어서 설명)
+"""
+
+    user_prompt = f"질문: {question}\n\n"
+
+    if contract_text:
+        user_prompt += f"계약서 내용:\n{contract_text}\n\n"
+
+    if context_sources:
+        user_prompt += "참고 자료:\n"
+        for i, source in enumerate(context_sources, 1):
+            user_prompt += f"\n[자료 {i}]\n{source}\n"
+
+    try:
+        response = client.models.generate_content(
+            model="gemini-2.0-flash-exp",
+            contents=[system_prompt + "\n\n" + user_prompt],
+            config=types.GenerateContentConfig(
+                temperature=0.3,  # 법률 상담은 약간의 유연성 허용
+            ),
+        )
+
+        answer = response.text
+
+        return {
+            "answer": answer,
+            "sources": context_sources if use_rag else [],
+            "status": "success"
+        }
+
+    except Exception as e:
+        logging.error(f"Chat failed: {e}")
+        return {
+            "answer": f"죄송합니다. 답변 생성 중 오류가 발생했습니다: {e}",
+            "sources": [],
+            "status": "error"
+        }
