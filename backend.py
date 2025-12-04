@@ -139,16 +139,36 @@ def get_answer(query):
     )
 
     # 3. 프롬프트 템플릿 작성
-    prompt = f"""당신은 사회초년생을 위한 친절한 법률 멘토 '하이라이터'입니다.
-아래의 [참고 문서]를 바탕으로 사용자의 질문에 명쾌하게 답해주세요.
+    prompt = f"""당신은 '하이라이터' 💡 - 사회초년생을 위한 친절한 법률 멘토입니다.
+딱딱한 법률 용어는 쉽게 풀어서 설명하고, 사용자가 겁먹지 않도록 공감하는 말투로 소통해주세요.
 
-[답변 필수 포함 항목]
-1. 🚨 워닝 사인 (위법 여부 판단)
-2. 💬 대처 스크립트 (사장님께 보낼 카톡 말투로)
-3. ⚖️ 법적 근거 (참고 문서의 출처 활용)
+[답변 생성 단계 - 반드시 이 순서로 사고하세요]
+1단계: 사용자 질문에서 핵심 법률 쟁점 파악
+2단계: [참고 문서]에서 관련 법률 근거 찾기
+3단계: 위반 여부 판단 (합법 / 위법 / 그레이존)
+4단계: 구체적인 대처 방법 및 말할 내용 작성
 
-[참고 문서]: {context}
-[질문]: {query}
+[답변 출력 형식 - 반드시 아래 구조로 작성하세요]
+
+📌 **핵심 요약**
+- 한 줄로 핵심만 요약해주세요 (예: "이 조항은 조금 위험해 보여요! 근로기준법 위반 가능성이 있어요.")
+- 이모지를 적극 활용하세요 (⚠️, 💡, 👮‍♀️, ✅, ❌ 등)
+
+⚖️ **법적 근거**
+- 관련 법률 조항을 쉽게 풀어서 설명해주세요
+- 참고 문서의 출처를 명시해주세요
+- 예시: "근로기준법 제50조에 따르면..."
+
+🗣️ **대처 스크립트**
+- 사장님께 그대로 읽어서 보낼 수 있는 구어체 문장으로 작성해주세요
+- 예시: "사장님, 계약서를 다시 확인해봤는데, 이 부분은 근로기준법상..."
+- 단호하지만 예의 있는 톤을 유지해주세요
+
+[참고 문서]
+{context}
+
+[사용자 질문]
+{query}
 """
 
     # 4. Gemini로 답변 생성
@@ -167,35 +187,53 @@ def chat_with_contract(user_question, contract_context):
         contract_context (str): 분석한 계약서 원문 텍스트
 
     Returns:
-        str: Gemini가 생성한 답변
+        str or dict: 정상 시 Gemini가 생성한 답변 (str), 에러 시 에러 메시지 딕셔너리 (dict)
     """
-    print(f"\n채팅 질문: {user_question}")
+    try:
+        print(f"\n채팅 질문: {user_question}")
 
-    # 1. search_db를 호출해서 관련 법률 지식 가져오기
-    print("관련 법률 지식 검색 중...")
-    legal_knowledge = search_db(user_question)
+        # 1. search_db를 호출해서 관련 법률 지식 가져오기
+        print("관련 법률 지식 검색 중...")
+        legal_knowledge = search_db(user_question)
 
-    # 2. ChatGoogleGenerativeAI 초기화
-    google_api_key = os.getenv("GOOGLE_API_KEY")
-    if not google_api_key:
-        raise ValueError("GOOGLE_API_KEY가 .env 파일에 설정되지 않았습니다.")
+        # 2. ChatGoogleGenerativeAI 초기화
+        google_api_key = os.getenv("GOOGLE_API_KEY")
+        if not google_api_key:
+            raise ValueError("GOOGLE_API_KEY가 .env 파일에 설정되지 않았습니다.")
 
-    llm = ChatGoogleGenerativeAI(
-        model="gemini-2.5-pro",
-        google_api_key=google_api_key,
-        temperature=0.7
-    )
+        llm = ChatGoogleGenerativeAI(
+            model="gemini-2.5-pro",
+            google_api_key=google_api_key,
+            temperature=0.7
+        )
 
-    # 3. 프롬프트 템플릿 작성 (계약서 내용 + 법률 지식)
-    prompt = f"""당신은 사회초년생을 위한 친절한 법률 멘토 '하이라이터'입니다.
-사용자가 자신의 계약서에 대해 추가 질문을 했습니다.
-아래의 [계약서 내용]과 [법률 지식]을 바탕으로 사용자의 질문에 명쾌하게 답해주세요.
+        # 3. 프롬프트 템플릿 작성 (계약서 내용 + 법률 지식)
+        prompt = f"""당신은 '하이라이터' 💡 - 사회초년생을 위한 친절한 법률 멘토입니다.
+사용자가 자신의 계약서에 대해 추가 질문을 했어요. 겁먹지 않게 공감하면서도 정확하게 답변해주세요!
 
-[답변 가이드라인]
-1. 계약서 내용을 구체적으로 인용하며 설명해주세요
-2. 관련 법률 근거를 함께 제시해주세요
-3. 실용적이고 실행 가능한 조언을 해주세요
-4. 친근하고 이해하기 쉬운 말투로 작성해주세요
+[답변 생성 단계 - 반드시 이 순서로 사고하세요]
+1단계: [계약서 내용]에서 질문과 관련된 조항 찾기
+2단계: [법률 지식]에서 해당 조항의 적법성 판단 근거 찾기
+3단계: 위반 여부 판단 (합법 ✅ / 위법 ❌ / 주의 필요 ⚠️)
+4단계: 사용자가 바로 행동할 수 있는 조언 작성
+
+[답변 출력 형식 - 반드시 아래 구조로 작성하세요]
+
+📌 **핵심 요약**
+- 질문에 대한 답을 한두 줄로 요약해주세요
+- 계약서의 구체적인 조항을 인용하며 설명하세요 (예: "계약서 3조에 따르면...")
+- 이모지를 적극 활용하세요 (⚠️, 💡, 👮‍♀️, ✅, ❌ 등)
+
+⚖️ **법적 근거**
+- 관련 법률을 쉽게 풀어서 설명해주세요
+- 이 조항이 왜 문제인지 또는 왜 괜찮은지 명확히 설명하세요
+- 예시: "근로기준법 제17조에 따르면, 근로계약서에는..."
+
+🗣️ **대처 스크립트**
+- 사장님께 보낼 수 있는 실제 메시지 형태로 작성해주세요
+- 구어체로, 그대로 복사-붙여넣기 할 수 있게 만들어주세요
+- 예시: "사장님, 계약서 3조 부분에 대해 여쭤보고 싶은 게 있어요. 근로기준법상..."
+- 단호하지만 예의를 지키는 톤을 유지하세요
 
 [계약서 내용]
 {contract_context[:3000]}
@@ -207,11 +245,15 @@ def chat_with_contract(user_question, contract_context):
 {user_question}
 """
 
-    # 4. Gemini로 답변 생성
-    print("Gemini가 답변을 생성 중...")
-    response = llm.invoke(prompt)
+        # 4. Gemini로 답변 생성
+        print("Gemini가 답변을 생성 중...")
+        response = llm.invoke(prompt)
 
-    return response.content
+        return response.content
+
+    except Exception as e:
+        print(f"Error in chat_with_contract: {e}")
+        return {"response": "죄송합니다. 잠시 연결이 원활하지 않아요. 다시 질문해 주시겠어요? 🔧"}
 
 
 def generate_suggested_questions(contract_text):
@@ -298,113 +340,143 @@ def analyze_contract(file_obj):
             - "contract_text": 추출된 계약서 원문 텍스트
             - "suggested_questions": LLM이 생성한 추천 질문 리스트 (3개)
     """
-    print(f"\n계약서 분석 시작: {file_obj.name}")
+    try:
+        print(f"\n계약서 분석 시작: {file_obj.name}")
 
-    # 1. 파일 타입 확인
-    file_type = file_obj.type
-    print(f"파일 타입: {file_type}")
+        # 1. 파일 타입 확인
+        file_type = file_obj.type
+        print(f"파일 타입: {file_type}")
 
-    extracted_text = ""
+        extracted_text = ""
 
-    # 2. 이미지 파일인 경우 (JPEG, PNG 등)
-    if file_type.startswith("image/"):
-        print("이미지 파일 감지 - Gemini Vision으로 텍스트 추출 중...")
+        # 2. 이미지 파일인 경우 (JPEG, PNG 등)
+        if file_type.startswith("image/"):
+            print("이미지 파일 감지 - Gemini Vision으로 텍스트 추출 중...")
 
-        # Google API Key 확인
-        google_api_key = os.getenv("GOOGLE_API_KEY")
-        if not google_api_key:
-            raise ValueError("GOOGLE_API_KEY가 .env 파일에 설정되지 않았습니다.")
+            # Google API Key 확인
+            google_api_key = os.getenv("GOOGLE_API_KEY")
+            if not google_api_key:
+                raise ValueError("GOOGLE_API_KEY가 .env 파일에 설정되지 않았습니다.")
 
-        # PIL로 이미지 로드
-        image = Image.open(file_obj)
+            # PIL로 이미지 로드
+            image = Image.open(file_obj)
 
-        # 이미지를 바이트로 변환
-        buffered = io.BytesIO()
-        image.save(buffered, format=image.format or "PNG")
-        image_bytes = buffered.getvalue()
+            # 이미지를 바이트로 변환
+            buffered = io.BytesIO()
+            image.save(buffered, format=image.format or "PNG")
+            image_bytes = buffered.getvalue()
 
-        # Base64로 인코딩
-        image_base64 = base64.b64encode(image_bytes).decode("utf-8")
+            # Base64로 인코딩
+            image_base64 = base64.b64encode(image_bytes).decode("utf-8")
 
-        # ChatGoogleGenerativeAI로 Vision 모델 초기화
-        llm = ChatGoogleGenerativeAI(
-            model="gemini-2.0-flash-exp",
-            google_api_key=google_api_key,
-            temperature=0.2
-        )
+            # ChatGoogleGenerativeAI로 Vision 모델 초기화
+            llm = ChatGoogleGenerativeAI(
+                model="gemini-2.0-flash-exp",
+                google_api_key=google_api_key,
+                temperature=0.2
+            )
 
-        # 이미지에서 텍스트 추출 프롬프트
-        text_prompt = """이 이미지는 계약서입니다.
+            # 이미지에서 텍스트 추출 프롬프트
+            text_prompt = """이 이미지는 계약서입니다.
 이미지에 있는 모든 텍스트를 정확하게 추출해주세요.
 계약 내용, 조항, 날짜, 서명란 등 모든 텍스트를 빠짐없이 추출해주세요."""
 
-        # HumanMessage로 이미지와 텍스트 함께 전달
-        message = HumanMessage(
-            content=[
-                {"type": "text", "text": text_prompt},
-                {
-                    "type": "image_url",
-                    "image_url": f"data:image/{image.format or 'png'};base64,{image_base64}"
-                }
-            ]
-        )
+            # HumanMessage로 이미지와 텍스트 함께 전달
+            message = HumanMessage(
+                content=[
+                    {"type": "text", "text": text_prompt},
+                    {
+                        "type": "image_url",
+                        "image_url": f"data:image/{image.format or 'png'};base64,{image_base64}"
+                    }
+                ]
+            )
 
-        # LLM 호출
-        response = llm.invoke([message])
-        extracted_text = response.content
-        print(f"추출된 텍스트 길이: {len(extracted_text)} 글자")
+            # LLM 호출
+            response = llm.invoke([message])
+            extracted_text = response.content
+            print(f"추출된 텍스트 길이: {len(extracted_text)} 글자")
 
-    # 3. PDF 파일인 경우
-    elif file_type == "application/pdf":
-        print("PDF 파일 감지 - pypdf로 텍스트 추출 중...")
+        # 3. PDF 파일인 경우
+        elif file_type == "application/pdf":
+            print("PDF 파일 감지 - pypdf로 텍스트 추출 중...")
 
-        # 파일 객체를 바이트로 읽기
-        pdf_bytes = file_obj.read()
-        pdf_file = io.BytesIO(pdf_bytes)
+            # 파일 객체를 바이트로 읽기
+            pdf_bytes = file_obj.read()
+            pdf_file = io.BytesIO(pdf_bytes)
 
-        # pypdf로 PDF 읽기
-        pdf_reader = pypdf.PdfReader(pdf_file)
+            # pypdf로 PDF 읽기
+            pdf_reader = pypdf.PdfReader(pdf_file)
 
-        # 모든 페이지의 텍스트 추출
-        for page_num, page in enumerate(pdf_reader.pages, 1):
-            page_text = page.extract_text()
-            extracted_text += page_text + "\n"
-            print(f"페이지 {page_num} 추출 완료")
+            # 모든 페이지의 텍스트 추출
+            for page_num, page in enumerate(pdf_reader.pages, 1):
+                page_text = page.extract_text()
+                extracted_text += page_text + "\n"
+                print(f"페이지 {page_num} 추출 완료")
 
-        print(f"총 추출된 텍스트 길이: {len(extracted_text)} 글자")
+            print(f"총 추출된 텍스트 길이: {len(extracted_text)} 글자")
 
-    else:
-        return {
-            "analysis": f"지원하지 않는 파일 형식입니다: {file_type}\n지원 형식: 이미지(JPG, PNG), PDF",
-            "contract_text": "",
-            "suggested_questions": []
-        }
+        else:
+            return {
+                "analysis": f"지원하지 않는 파일 형식입니다: {file_type}\n지원 형식: 이미지(JPG, PNG), PDF",
+                "contract_text": "",
+                "suggested_questions": []
+            }
 
-    # 4. 추출된 텍스트가 없으면 오류 반환
-    if not extracted_text.strip():
-        return {
-            "analysis": "텍스트를 추출할 수 없습니다. 파일이 비어있거나 읽을 수 없습니다.",
-            "contract_text": "",
-            "suggested_questions": []
-        }
+        # 4. 추출된 텍스트가 없으면 오류 반환
+        if not extracted_text.strip():
+            return {
+                "analysis": "텍스트를 추출할 수 없습니다. 파일이 비어있거나 읽을 수 없습니다.",
+                "contract_text": "",
+                "suggested_questions": []
+            }
 
-    # 5. get_answer() 함수로 계약서 분석
-    print("\n계약서 내용을 분석 중...")
-    analysis_query = f"""다음은 계약서의 내용입니다. 이 계약서를 분석해서 사회초년생이 주의해야 할 위험 요소를 찾아주세요.
+        # 5. get_answer() 함수로 계약서 분석
+        print("\n계약서 내용을 분석 중...")
+        analysis_query = f"""당신은 '하이라이터' 💡 입니다. 사회초년생이 처음 받은 계약서를 검토해달라고 요청했어요.
+이 친구가 불이익을 당하지 않도록, 꼼꼼하게 확인해주세요!
+
+[분석 단계 - 반드시 이 순서로 사고하세요]
+1단계: 계약서의 주요 조항 파악 (근로시간, 임금, 휴일, 수당, 계약기간 등)
+2단계: 각 조항이 근로기준법 등 관련 법령에 부합하는지 대조
+3단계: 위반 사항 또는 불리한 조항 식별 (❌ 명백한 위법 / ⚠️ 주의 필요 / ✅ 괜찮음)
+4단계: 사용자가 사장님께 말할 수 있는 구체적인 스크립트 작성
 
 [계약서 내용]
 {extracted_text}
 
-위 계약서에서 문제가 될 수 있는 부분을 찾아서 분석해주세요."""
+위 계약서에서 문제가 될 수 있는 부분을 찾아서, 아래 형식으로 분석 결과를 작성해주세요.
 
-    analysis_result = get_answer(analysis_query)
+📌 **핵심 요약**
+- "이 계약서는 [문제없어요 ✅ / 조금 위험해 보여요 ⚠️ / 위법 조항이 있어요 ❌]" 형태로 한 줄 요약
+- 가장 심각한 문제 1-2개를 강조해주세요
 
-    # 6. 추천 질문 생성
-    suggested_questions = generate_suggested_questions(extracted_text)
+⚖️ **법적 근거**
+- 문제가 있는 조항마다 관련 법률 근거를 쉽게 풀어서 설명
+- 예시: "근로기준법 제50조는 1주 40시간을 초과할 수 없다고 명시하고 있어요."
 
-    # 7. Dictionary 형태로 결과 반환
-    return {
-        "analysis": analysis_result,
-        "contract_text": extracted_text,
-        "suggested_questions": suggested_questions
-    }
+🗣️ **대처 스크립트**
+- 사장님께 보낼 수 있는 실제 메시지를 작성해주세요
+- 구어체로, 복사-붙여넣기 가능하게
+- 예시: "사장님, 계약서 검토해봤는데 몇 가지 확인하고 싶은 부분이 있어요. 제2조의 근로시간 부분이 근로기준법상..."
+- 단호하되 예의 바르게"""
+
+        analysis_result = get_answer(analysis_query)
+
+        # 6. 추천 질문 생성
+        suggested_questions = generate_suggested_questions(extracted_text)
+
+        # 7. Dictionary 형태로 결과 반환
+        return {
+            "analysis": analysis_result,
+            "contract_text": extracted_text,
+            "suggested_questions": suggested_questions
+        }
+
+    except Exception as e:
+        print(f"Error in analyze_contract: {e}")
+        return {
+            "analysis": "일시적인 오류로 분석에 실패했어요. 😢",
+            "contract_text": "",
+            "suggested_questions": []
+        }
