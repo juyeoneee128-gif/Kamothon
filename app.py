@@ -875,20 +875,6 @@ if not st.session_state.analysis_complete:
     else:
         st.session_state.uploaded_images = uploaded_files
         
-        st.markdown('''<style>
-            [data-testid="stFileUploader"],
-            [data-testid="stFileUploader"] > *,
-            .stFileUploader,
-            section[data-testid="stFileUploadDropzone"] {
-                display: none !important;
-                height: 0 !important;
-                min-height: 0 !important;
-                padding: 0 !important;
-                margin: 0 !important;
-                overflow: hidden !important;
-            }
-        </style>''', unsafe_allow_html=True)
-        
         st.markdown('<div class="analyze-button-container">', unsafe_allow_html=True)
         analyze_clicked = st.button("🔍 계약서 분석하기", type="primary", use_container_width=True)
         st.markdown('</div>', unsafe_allow_html=True)
@@ -1017,7 +1003,6 @@ if not st.session_state.analysis_complete:
                 img.save(buffered, format="PNG")
                 img_base64 = base64.b64encode(buffered.getvalue()).decode()
                 preview_html += f'<div class="preview-item"><div class="uploaded-preview"><img src="data:image/png;base64,{img_base64}" /></div></div>'
-        preview_html += '<div class="preview-item"><div class="add-image-btn" onclick="document.querySelector(\'[data-testid=stFileUploader] input\').click()"><span>+</span><small>추가</small></div></div>'
         preview_html += '</div>'
         
         st.markdown(preview_html, unsafe_allow_html=True)
