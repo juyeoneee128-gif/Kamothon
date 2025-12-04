@@ -653,6 +653,18 @@ st.markdown("""
         color: var(--text-primary) !important;
     }
     
+    /* Disabled button styling */
+    .stButton button:disabled {
+        cursor: not-allowed !important;
+        opacity: 0.5 !important;
+        pointer-events: auto !important;
+    }
+    .stButton button:disabled:hover {
+        background: inherit !important;
+        transform: none !important;
+        box-shadow: none !important;
+    }
+    
     /* ===== MISC ===== */
     .uploaded-preview {
         position: relative;
