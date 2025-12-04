@@ -959,9 +959,9 @@ if not st.session_state.analysis_complete:
         """, unsafe_allow_html=True)
     
     if has_files:
-        st.markdown('<div class="analyze-button-container">', unsafe_allow_html=True)
-        analyze_clicked = st.button("🔍 계약서 분석하기", type="primary", use_container_width=True, disabled=is_analyzing)
-        st.markdown('</div>', unsafe_allow_html=True)
+        col1, col2, col3 = st.columns([1, 2, 1])
+        with col2:
+            analyze_clicked = st.button("🔍 계약서 분석하기", type="primary", use_container_width=True, disabled=is_analyzing)
         
         if analyze_clicked:
             st.session_state.is_analyzing = True
