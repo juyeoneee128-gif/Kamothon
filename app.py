@@ -872,6 +872,8 @@ if 'analysis_error' not in st.session_state:
     st.session_state.analysis_error = None
 if 'uploader_key' not in st.session_state:
     st.session_state.uploader_key = 0
+if 'is_analyzing' not in st.session_state:
+    st.session_state.is_analyzing = False
 
 def get_mime_type(filename: str) -> str:
     ext = filename.lower().split('.')[-1]
@@ -892,13 +894,16 @@ if DEMO_MODE:
     st.session_state.analysis_complete = True
 
 if not st.session_state.analysis_complete:
+    is_analyzing = st.session_state.is_analyzing
+    
     uploaded_files = st.file_uploader(
         "계약서 이미지 또는 PDF 선택",
         type=['png', 'jpg', 'jpeg', 'pdf'],
         help="계약서 사진 또는 PDF를 드래그하거나 클릭해서 업로드하세요 (여러 개 선택 가능)",
         label_visibility="collapsed",
         key=f"contract_uploader_{st.session_state.uploader_key}",
-        accept_multiple_files=True
+        accept_multiple_files=True,
+        disabled=is_analyzing
     )
     
     if not uploaded_files:
@@ -911,10 +916,14 @@ if not st.session_state.analysis_complete:
         st.session_state.uploaded_images = uploaded_files
         
         st.markdown('<div class="analyze-button-container">', unsafe_allow_html=True)
-        analyze_clicked = st.button("🔍 계약서 분석하기", type="primary", use_container_width=True)
+        analyze_clicked = st.button("🔍 계약서 분석하기", type="primary", use_container_width=True, disabled=is_analyzing)
         st.markdown('</div>', unsafe_allow_html=True)
         
         if analyze_clicked:
+            st.session_state.is_analyzing = True
+            st.rerun()
+        
+        if is_analyzing:
             progress_messages = [
                 ("📄 계약서 이미지를 읽고 있어요...", 0.08),
                 ("🔍 사진을 인식하고 있어요...", 0.18),
@@ -972,6 +981,8 @@ if not st.session_state.analysis_complete:
             status_container.empty()
             progress_bar.empty()
             
+            st.session_state.is_analyzing = False
+            
             if analysis_result["error"]:
                 st.session_state.analysis_error = analysis_result["error"]
                 st.session_state.analysis_complete = False
@@ -1024,14 +1035,14 @@ if not st.session_state.analysis_complete:
         
         col1, col2, col3 = st.columns([1, 1, 1])
         with col2:
-            if st.button("🗑️ 업로드 취소", key="cancel_all", use_container_width=True):
+            if st.button("🗑️ 업로드 취소", key="cancel_all", use_container_width=True, disabled=is_analyzing):
                 st.session_state.uploader_key += 1
                 st.session_state.uploaded_images = []
                 st.rerun()
         
         if st.session_state.analysis_error:
             st.error(f"😥 {st.session_state.analysis_error}")
-            if st.button("🔄 다시 시도하기"):
+            if st.button("🔄 다시 시도하기", disabled=is_analyzing):
                 st.session_state.analysis_error = None
                 st.rerun()
 
