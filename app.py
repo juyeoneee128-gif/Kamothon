@@ -874,6 +874,36 @@ if 'uploader_key' not in st.session_state:
     st.session_state.uploader_key = 0
 if 'is_analyzing' not in st.session_state:
     st.session_state.is_analyzing = False
+if 'file_manifest' not in st.session_state:
+    st.session_state.file_manifest = {}
+if 'show_add_uploader' not in st.session_state:
+    st.session_state.show_add_uploader = False
+if 'add_uploader_key' not in st.session_state:
+    st.session_state.add_uploader_key = 0
+
+import hashlib
+
+def get_file_hash(file_bytes: bytes) -> str:
+    return hashlib.sha256(file_bytes).hexdigest()[:16]
+
+def add_files_to_manifest(files):
+    added_count = 0
+    for f in files:
+        f.seek(0)
+        file_bytes = f.read()
+        file_hash = get_file_hash(file_bytes)
+        if file_hash not in st.session_state.file_manifest:
+            st.session_state.file_manifest[file_hash] = {
+                "name": f.name,
+                "mime": get_mime_type(f.name),
+                "bytes": file_bytes
+            }
+            added_count += 1
+    return added_count
+
+def reset_manifest():
+    st.session_state.file_manifest = {}
+    st.session_state.show_add_uploader = False
 
 def get_mime_type(filename: str) -> str:
     ext = filename.lower().split('.')[-1]
@@ -895,26 +925,40 @@ if DEMO_MODE:
 
 if not st.session_state.analysis_complete:
     is_analyzing = st.session_state.is_analyzing
+    has_files = len(st.session_state.file_manifest) > 0
     
-    uploaded_files = st.file_uploader(
-        "계약서 이미지 또는 PDF 선택",
-        type=['png', 'jpg', 'jpeg', 'pdf'],
-        help="계약서 사진 또는 PDF를 드래그하거나 클릭해서 업로드하세요 (여러 개 선택 가능)",
-        label_visibility="collapsed",
-        key=f"contract_uploader_{st.session_state.uploader_key}",
-        accept_multiple_files=True,
-        disabled=is_analyzing
-    )
+    if not has_files or st.session_state.show_add_uploader:
+        uploader_label = "추가할 파일 선택" if has_files else "계약서 이미지 또는 PDF 선택"
+        uploaded_files = st.file_uploader(
+            uploader_label,
+            type=['png', 'jpg', 'jpeg', 'pdf'],
+            help="계약서 사진 또는 PDF를 드래그하거나 클릭해서 업로드하세요 (여러 개 선택 가능)",
+            label_visibility="collapsed",
+            key=f"contract_uploader_{st.session_state.uploader_key}",
+            accept_multiple_files=True,
+            disabled=is_analyzing
+        )
+        
+        if uploaded_files:
+            added = add_files_to_manifest(uploaded_files)
+            if added > 0:
+                st.session_state.show_add_uploader = False
+                st.session_state.uploader_key += 1
+                st.rerun()
+            elif has_files:
+                st.toast("이미 추가된 파일이에요!", icon="ℹ️")
+                st.session_state.show_add_uploader = False
+                st.session_state.uploader_key += 1
+                st.rerun()
     
-    if not uploaded_files:
+    if not has_files and not st.session_state.show_add_uploader:
         st.markdown("""
         <div style="text-align: center; max-width: 800px; margin: 0 auto;">
             <span class="privacy-badge">🔒 이미지는 분석 후 즉시 삭제됩니다</span>
         </div>
         """, unsafe_allow_html=True)
-    else:
-        st.session_state.uploaded_images = uploaded_files
-        
+    
+    if has_files:
         st.markdown('<div class="analyze-button-container">', unsafe_allow_html=True)
         analyze_clicked = st.button("🔍 계약서 분석하기", type="primary", use_container_width=True, disabled=is_analyzing)
         st.markdown('</div>', unsafe_allow_html=True)
@@ -944,16 +988,15 @@ if not st.session_state.analysis_complete:
             analysis_done = threading.Event()
             analysis_result = {"result": None, "error": None}
             
+            manifest_copy = dict(st.session_state.file_manifest)
+            
             def run_analysis():
                 try:
                     from gemini_analyzer import analyze_contract_files
                     
                     file_data_list = []
-                    for uf in uploaded_files:
-                        uf.seek(0)
-                        file_bytes = uf.read()
-                        mime_type = get_mime_type(uf.name)
-                        file_data_list.append((file_bytes, mime_type))
+                    for file_hash, file_info in manifest_copy.items():
+                        file_data_list.append((file_info["bytes"], file_info["mime"]))
                     
                     result = analyze_contract_files(file_data_list)
                     analysis_result["result"] = result
@@ -995,35 +1038,29 @@ if not st.session_state.analysis_complete:
                     
             st.rerun()
         
-        pdf_count = sum(1 for uf in uploaded_files if is_pdf(uf.name))
-        img_count = len(uploaded_files) - pdf_count
-        
-        file_desc_parts = []
-        if img_count > 0:
-            file_desc_parts.append(f"이미지 {img_count}장")
-        if pdf_count > 0:
-            file_desc_parts.append(f"PDF {pdf_count}개")
-        file_desc = ", ".join(file_desc_parts)
+        manifest = st.session_state.file_manifest
+        pdf_count = sum(1 for f in manifest.values() if f["mime"] == "application/pdf")
+        img_count = len(manifest) - pdf_count
         
         import base64
         from io import BytesIO
         
-        total_files = len(uploaded_files)
+        total_files = len(manifest)
         
         st.markdown(f'<p style="text-align:center; color: var(--text-secondary); margin-bottom: 0.75rem; font-size: 0.875rem;">📄 총 {total_files}개 파일 선택됨</p>', unsafe_allow_html=True)
         
         preview_html = '<div class="preview-grid">'
-        for idx, uf in enumerate(uploaded_files):
-            if is_pdf(uf.name):
+        for file_hash, file_info in manifest.items():
+            if file_info["mime"] == "application/pdf":
+                name = file_info["name"]
                 preview_html += f'''<div class="preview-item">
                     <div class="uploaded-preview" style="display: flex; flex-direction: column; align-items: center; justify-content: center; background: #FEF3C7;">
                         <div style="font-size: 3rem;">📄</div>
-                        <div style="font-size: 0.75rem; color: #92400E; margin-top: 0.5rem; text-align: center; word-break: break-all; padding: 0 0.5rem;">{uf.name[:20]}{"..." if len(uf.name) > 20 else ""}</div>
+                        <div style="font-size: 0.75rem; color: #92400E; margin-top: 0.5rem; text-align: center; word-break: break-all; padding: 0 0.5rem;">{name[:20]}{"..." if len(name) > 20 else ""}</div>
                     </div>
                 </div>'''
             else:
-                uf.seek(0)
-                img = Image.open(uf)
+                img = Image.open(BytesIO(file_info["bytes"]))
                 img.thumbnail((160, 160))
                 buffered = BytesIO()
                 img.save(buffered, format="PNG")
@@ -1033,11 +1070,17 @@ if not st.session_state.analysis_complete:
         
         st.markdown(preview_html, unsafe_allow_html=True)
         
-        col1, col2, col3 = st.columns([1, 1, 1])
+        col1, col2 = st.columns([1, 1])
+        with col1:
+            add_more_clicked = st.button("➕ 이미지 추가", key="add_more", use_container_width=True, disabled=is_analyzing)
+            if add_more_clicked:
+                st.session_state.show_add_uploader = True
+                st.session_state.add_uploader_key += 1
+                st.rerun()
         with col2:
             if st.button("🗑️ 업로드 취소", key="cancel_all", use_container_width=True, disabled=is_analyzing):
+                reset_manifest()
                 st.session_state.uploader_key += 1
-                st.session_state.uploaded_images = []
                 st.rerun()
         
         if st.session_state.analysis_error:
