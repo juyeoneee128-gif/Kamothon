@@ -1313,6 +1313,143 @@ else:
     
     st.markdown("<br>", unsafe_allow_html=True)
     
+    st.markdown("""
+    <style>
+    .chat-section {
+        max-width: 720px;
+        margin: 2rem auto;
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-lg);
+        padding: 1.5rem;
+        box-shadow: var(--shadow-sm);
+    }
+    .chat-header {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 1px solid var(--border-color);
+    }
+    .chat-icon {
+        font-size: 1.25rem;
+    }
+    .chat-title {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+    .chat-subtitle {
+        font-size: 0.8rem;
+        color: var(--text-muted);
+        margin-left: auto;
+    }
+    .chat-messages {
+        max-height: 300px;
+        overflow-y: auto;
+        margin-bottom: 1rem;
+    }
+    .chat-message {
+        padding: 0.75rem 1rem;
+        border-radius: var(--radius-md);
+        margin-bottom: 0.75rem;
+        font-size: 0.9rem;
+        line-height: 1.6;
+    }
+    .chat-message.user {
+        background: var(--bg-subtle);
+        color: var(--text-primary);
+        margin-left: 2rem;
+    }
+    .chat-message.assistant {
+        background: #FEF9E7;
+        border: 1px solid #FCEFC7;
+        color: var(--text-primary);
+        margin-right: 2rem;
+    }
+    .chat-message .role {
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: var(--text-muted);
+        margin-bottom: 0.25rem;
+    }
+    .chat-empty {
+        text-align: center;
+        padding: 2rem;
+        color: var(--text-muted);
+        font-size: 0.875rem;
+    }
+    .chat-input-area {
+        display: flex;
+        gap: 0.5rem;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+    
+    st.markdown("""
+    <div class="chat-section">
+        <div class="chat-header">
+            <span class="chat-icon">💬</span>
+            <span class="chat-title">추가 질문하기</span>
+            <span class="chat-subtitle">계약서 내용에 대해 궁금한 점을 물어보세요</span>
+        </div>
+    """, unsafe_allow_html=True)
+    
+    if st.session_state.chat_messages:
+        messages_html = '<div class="chat-messages">'
+        for msg in st.session_state.chat_messages:
+            role_class = "user" if msg["role"] == "user" else "assistant"
+            role_label = "나" if msg["role"] == "user" else "AI 상담사"
+            messages_html += f'''
+            <div class="chat-message {role_class}">
+                <div class="role">{role_label}</div>
+                {msg["content"]}
+            </div>
+            '''
+        messages_html += '</div>'
+        st.markdown(messages_html, unsafe_allow_html=True)
+    else:
+        st.markdown('''
+        <div class="chat-empty">
+            💡 예시: "휴게시간이 왜 문제인가요?", "이 계약서 서명해도 될까요?"
+        </div>
+        ''', unsafe_allow_html=True)
+    
+    st.markdown('</div>', unsafe_allow_html=True)
+    
+    col_input, col_send = st.columns([5, 1])
+    with col_input:
+        user_question = st.text_input(
+            "질문 입력",
+            placeholder="계약서에 대해 궁금한 점을 입력하세요...",
+            label_visibility="collapsed",
+            key="chat_input"
+        )
+    with col_send:
+        send_clicked = st.button("전송", use_container_width=True, type="primary")
+    
+    if send_clicked and user_question.strip():
+        st.session_state.chat_messages.append({
+            "role": "user",
+            "content": user_question.strip()
+        })
+        
+        import backend
+        with st.spinner("답변 생성 중..."):
+            response = backend.chat_with_contract(
+                user_question.strip(),
+                st.session_state.contract_context
+            )
+        
+        st.session_state.chat_messages.append({
+            "role": "assistant",
+            "content": response
+        })
+        st.rerun()
+    
+    st.markdown("<br>", unsafe_allow_html=True)
+    
     col_btn1, col_btn2, col_btn3 = st.columns([1, 1, 1])
     with col_btn2:
         if st.button("🔄 다른 계약서 분석하기", use_container_width=True):
@@ -1320,6 +1457,8 @@ else:
             st.session_state.uploaded_image = None
             st.session_state.analysis_result = None
             st.session_state.analysis_error = None
+            st.session_state.chat_messages = []
+            st.session_state.contract_context = ""
             st.rerun()
 
 st.markdown("""

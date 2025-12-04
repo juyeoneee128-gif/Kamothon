@@ -113,6 +113,20 @@ ContractAnalysisResult:
 - **Layout**: Centered content (max-width 720px), wide margins
 
 ## Recent Changes
+- **2024-12-04**:
+  - **Chat Feature Added**:
+    - backend.py: Added `chat_with_contract(user_question, contract_context)` function
+    - Uses Gemini API to answer follow-up questions about the contract
+    - Session state stores `contract_context` and `chat_messages`
+    - Chat UI on results page with message history and input field
+  - **Preview Grid UX Update**:
+    - "이미지 추가" button now appears as last item in preview grid
+    - X delete button overlays each preview item
+    - 3 items per row layout
+  - **Navigation Bar on Results Page**:
+    - Back button (뒤로가기) - keeps uploaded files
+    - Home button (홈으로) - resets everything
+
 - **2024-12-03**: 
   - **Modern Premium Design Overhaul**:
     - Clean, minimalist, professional style
