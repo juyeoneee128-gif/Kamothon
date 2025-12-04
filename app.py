@@ -627,14 +627,14 @@ st.markdown("""
     /* ===== MISC ===== */
     .uploaded-preview {
         position: relative;
-        max-width: 200px;
-        margin: 0 auto 1rem auto;
+        width: 80px;
+        height: 80px;
+        margin: 0 auto 0.5rem auto;
         background: var(--bg-card);
         border: 1px solid var(--border-color);
-        border-radius: var(--radius-lg);
-        padding: 0.5rem;
+        border-radius: 8px;
+        padding: 4px;
         box-shadow: var(--shadow-sm);
-        aspect-ratio: 1 / 1;
         overflow: hidden;
         display: flex;
         align-items: center;
@@ -645,7 +645,20 @@ st.markdown("""
         width: 100%;
         height: 100%;
         object-fit: cover;
-        border-radius: var(--radius-md);
+        border-radius: 6px;
+    }
+    
+    .preview-grid {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 0.5rem;
+        max-width: 600px;
+        margin: 0 auto 1rem auto;
+    }
+    
+    .preview-item {
+        flex: 0 0 auto;
     }
     
     .uploaded-preview > div:first-child {
@@ -891,19 +904,26 @@ if not st.session_state.analysis_complete:
             file_desc_parts.append(f"PDF {pdf_count}개")
         file_desc = ", ".join(file_desc_parts)
         
-        st.markdown(f'<p style="text-align:center; color: var(--text-secondary); margin-bottom: 1rem;">📄 {file_desc} 선택됨</p>', unsafe_allow_html=True)
+        st.markdown(f'<p style="text-align:center; color: var(--text-secondary); margin-bottom: 0.75rem; font-size: 0.875rem;">📄 {file_desc} 선택됨</p>', unsafe_allow_html=True)
         
-        num_cols = min(len(uploaded_files), 4)
-        cols = st.columns(num_cols)
+        import base64
+        from io import BytesIO
+        
+        preview_html = '<div class="preview-grid">'
         for idx, uf in enumerate(uploaded_files):
-            with cols[idx % num_cols]:
-                st.markdown('<div class="uploaded-preview">', unsafe_allow_html=True)
-                if is_pdf(uf.name):
-                    st.markdown(f'<div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; color: var(--text-secondary);"><span style="font-size:2rem;">📑</span><span style="font-size:0.75rem; margin-top:0.5rem;">PDF</span></div>', unsafe_allow_html=True)
-                else:
-                    img = Image.open(uf)
-                    st.image(img, use_container_width=True)
-                st.markdown('</div>', unsafe_allow_html=True)
+            if is_pdf(uf.name):
+                preview_html += '<div class="preview-item"><div class="uploaded-preview"><div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; color: var(--text-secondary);"><span style="font-size:1.5rem;">📑</span></div></div></div>'
+            else:
+                uf.seek(0)
+                img = Image.open(uf)
+                img.thumbnail((160, 160))
+                buffered = BytesIO()
+                img.save(buffered, format="PNG")
+                img_base64 = base64.b64encode(buffered.getvalue()).decode()
+                preview_html += f'<div class="preview-item"><div class="uploaded-preview"><img src="data:image/png;base64,{img_base64}" /></div></div>'
+        preview_html += '</div>'
+        
+        st.markdown(preview_html, unsafe_allow_html=True)
         
         col1, col2, col3 = st.columns([1, 1, 1])
         with col2:
