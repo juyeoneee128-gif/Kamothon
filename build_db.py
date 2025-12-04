@@ -8,7 +8,11 @@ data/ 폴더의 모든 PDF 파일을 읽어서 ChromaDB 벡터 DB를 새로 구�
 
 import os
 import shutil
-from backend import build_vector_db
+from dotenv import load_dotenv
+from gemini_analyzer import build_vector_db
+
+# Load environment variables from .env file
+load_dotenv()
 
 
 def main():
