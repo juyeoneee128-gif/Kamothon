@@ -98,6 +98,7 @@ Deploy: Replit (Combined Environment)
     ├── labor_law.pdf       # 근로기준법
     ├── copyright_act.pdf   # 저작권법
     └── ... (총 15개 파일)
+```
 
 ## 🚀 빠른 시작
 
@@ -149,4 +150,3 @@ MIT License
 GitHub Issue를 통해 버그 리포트가 가능하다.
 
 Made with ❤️ by Team 파피플
-
