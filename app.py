@@ -978,6 +978,9 @@ if not st.session_state.analysis_complete:
                 .preview-grid, .preview-item, .uploaded-preview {
                     display: none !important;
                 }
+                [data-testid="stFileUploader"] {
+                    display: none !important;
+                }
             </style>
             """, unsafe_allow_html=True)
             
