@@ -1,4 +1,4 @@
-# 🤖 계약서 위험 탐지기
+# 🤖 계약서 위험 탐지기 (Contract Risk Highlighter)
 
 아르바이트생, 프리랜서 등 사회초년생이 근로 계약 시 겪는 정보 비대칭 문제를 해결하기 위한 AI 기반 계약서 검토 서비스이다. 사용자가 업로드한 계약서 이미지 또는 PDF를 분석하여 핵심 위험 조항 위반 여부를 정밀 탐지하고, 비전문가도 이해하기 쉬운 언어로 법률 정보와 협상 가이드를 제공한다.
 
@@ -14,6 +14,7 @@
 
 ### 🛡️ PII 자동 마스킹 및 텍스트 정제
 OCR 과정에서 발생하는 줄바꿈 깨짐 현상을 교정하여 문맥을 복원하는 전처리 파이프라인을 내장했다. 또한, 계약서 내의 성명, 주민등록번호, 주소 등 개인식별정보(PII)를 시스템 프롬프트 단계에서 식별하여 `[이름]`, `[전화번호]`와 같은 플레이스홀더로 치환함으로써 데이터 보안을 유지한다.
+
 
 ---
 
@@ -45,27 +46,65 @@ AI가 직관적으로 결론을 내리는 것을 방지하기 위해 4단계 사
 ---
 
 ## 🏗️ 아키텍처
-[User Upload (IMG/PDF)] │ ▼ [Streamlit Frontend] ──(Replit)──┐ │ │ ▼ │ [Backend Server] (Python) <──────┘ │ ├──▶ [Preprocessing] │ └─ Text Cleaning (Line Break Fix) │ └─ PII Masking │ ├──▶ [Hybrid Analysis Engine] │ │ │ ├── [Track 1: Rules] (15 Mandatory Clauses Dataset) │ │ │ └── [Track 2: RAG] (ChromaDB Vector Store) │ └─ Source: Labor Law, Copyright Act PDF │ ▼ [Gemini 2.5 Pro] (Vision & Reasoning) │ ▼ [Structured Result (JSON)]
 
-### 기술 스택
-- **Frontend**: Streamlit 1.51.0
-- **Backend**: Python 3.11, LangChain 0.3.0
-- **Database**: ChromaDB 0.5.5 (Local Vector Store)
-- **AI Models**: Google Gemini 2.5 Pro (Vision/Analysis)
-- **Deploy**: Replit (Combined Environment)
+```text
+[User Upload (IMG/PDF)]
+       │
+       ▼
+[Streamlit Frontend] ──(Replit)──┐
+       │                         │
+       ▼                         │
+[Backend Server] (Python) <──────┘
+       │
+       ├──▶ [Preprocessing] 
+       │    └─ Text Cleaning (Line Break Fix)
+       │    └─ PII Masking
+       │
+       ├──▶ [Hybrid Analysis Engine]
+       │    │
+       │    ├── [Track 1: Rules] (15 Mandatory Clauses Dataset)
+       │    │
+       │    └── [Track 2: RAG] (ChromaDB Vector Store)
+       │          └─ Source: Labor Law, Copyright Act PDF
+       │
+       ▼
+[Gemini 2.5 Pro] (Vision & Reasoning)
+       │
+       ▼
+[Structured Result (JSON)]
 
----
+기술 스택
+Frontend: Streamlit 1.51.0
 
-## 📂 프로젝트 구조
-. ├── app.py # 메인 애플리케이션 및 UI 렌더링 ├── backend.py # 분석 로직 오케스트레이션 ├── gemini_analyzer.py # 프롬프트 관리 및 LLM 호출 엔진 ├── build_db.py # 법령 데이터 벡터화 스크립트 ├── requirements.txt # 라이브러리 의존성 명세 ├── packages.txt # 시스템 패키지 설정 ├── .env # API Key 환경 변수 └── data/ # RAG용 법률 데이터셋 ├── labor_law.pdf # 근로기준법 ├── copyright_act.pdf # 저작권법 └── ... (총 15개 파일)
+Backend: Python 3.11, LangChain 0.3.0
 
----
+Database: ChromaDB 0.5.5 (Local Vector Store)
+
+AI Models: Google Gemini 2.5 Pro (Vision/Analysis)
+
+Deploy: Replit (Combined Environment)
+
+📂 프로젝트 구조
+.
+├── app.py                  # 메인 애플리케이션 및 UI 렌더링
+├── backend.py              # 분석 로직 오케스트레이션
+├── gemini_analyzer.py      # 프롬프트 관리 및 LLM 호출 엔진
+├── build_db.py             # 법령 데이터 벡터화 스크립트
+├── requirements.txt        # 라이브러리 의존성 명세
+├── packages.txt            # Replit 시스템 패키지 설정
+├── chroma_db/              # (자동 생성) 법령 데이터 벡터 저장소
+├── .env                    # (로컬용) API Key 환경 변수
+└── data/                   # RAG용 법률 데이터셋 (PDF)
+    ├── labor_law.pdf       # 근로기준법
+    ├── copyright_act.pdf   # 저작권법
+    └── ... (총 15개 파일)
 
 ## 🚀 빠른 시작
 
 ### 1. 사전 준비
 - Google Gemini API Key 발급
 - Python 3.10 이상 설치
+
 
 ### 2. 설정 단계
 ```bash
@@ -81,10 +120,12 @@ echo "GOOGLE_API_KEY=your_api_key" > .env
 # 법률 데이터베이스 구축 (최초 1회)
 python build_db.py
 
-### 3. 배포 단계
+
+### 3. [배포 단계]
 ```bash
 # 애플리케이션 실행
 streamlit run app.py
+
 
 🔐 보안
 API Key 관리: .env 파일을 통해 관리하며 .gitignore를 통해 버전 관리 시스템에서 배제했다.
@@ -108,3 +149,4 @@ MIT License
 GitHub Issue를 통해 버그 리포트가 가능하다.
 
 Made with ❤️ by Team 파피플
+
