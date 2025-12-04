@@ -843,24 +843,31 @@ if not st.session_state.analysis_complete:
                     
             st.rerun()
         
-        st.markdown('<div class="uploaded-preview">', unsafe_allow_html=True)
-        
-        cancel_clicked = st.button("✕", key="cancel_upload", help="업로드 취소")
-        if cancel_clicked:
-            st.session_state.uploaded_images = []
-            st.rerun()
+        st.markdown(f'<p style="text-align:center; color: var(--text-secondary); margin-bottom: 0.5rem;">📄 {len(uploaded_files)}장의 이미지가 선택됨</p>', unsafe_allow_html=True)
         
         if len(uploaded_files) == 1:
-            image = Image.open(uploaded_files[0])
-            st.image(image, use_container_width=True)
+            col1, col2, col3 = st.columns([1, 6, 1])
+            with col2:
+                st.markdown('<div class="uploaded-preview">', unsafe_allow_html=True)
+                image = Image.open(uploaded_files[0])
+                st.image(image, use_container_width=True)
+                st.markdown('</div>', unsafe_allow_html=True)
+            with col3:
+                if st.button("✕", key="cancel_0", help="삭제"):
+                    st.rerun()
         else:
-            st.markdown(f'<p style="text-align:center; color: var(--text-secondary); margin-bottom: 1rem;">📄 {len(uploaded_files)}장의 이미지가 선택됨</p>', unsafe_allow_html=True)
-            cols = st.columns(min(len(uploaded_files), 3))
+            num_cols = min(len(uploaded_files), 3)
+            cols = st.columns(num_cols)
             for idx, uf in enumerate(uploaded_files):
-                with cols[idx % 3]:
+                with cols[idx % num_cols]:
+                    st.markdown('<div class="uploaded-preview" style="padding: 0.75rem;">', unsafe_allow_html=True)
                     img = Image.open(uf)
                     st.image(img, use_container_width=True)
+                    st.markdown('</div>', unsafe_allow_html=True)
         
+        st.markdown('<div style="text-align: center; margin-top: 1rem;">', unsafe_allow_html=True)
+        if st.button("🗑️ 전체 취소", key="cancel_all"):
+            st.rerun()
         st.markdown('</div>', unsafe_allow_html=True)
         
         if st.session_state.analysis_error:
