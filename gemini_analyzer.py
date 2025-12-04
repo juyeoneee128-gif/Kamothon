@@ -186,6 +186,7 @@ def analyze_contract_image(image_bytes: bytes, mime_type: str = "image/jpeg") ->
                 system_prompt + "\n\n위 계약서 이미지를 분석해주세요.",
             ],
             config=types.GenerateContentConfig(
+                temperature=0.0,  # 일관성 있는 법률 분석을 위해 창의성 제한
                 response_mime_type="application/json",
                 response_schema=ContractAnalysisResult,
             ),
@@ -276,6 +277,7 @@ def analyze_contract_images(image_data_list: list[tuple[bytes, str]]) -> Optiona
             model="gemini-2.5-pro",
             contents=contents,
             config=types.GenerateContentConfig(
+                temperature=0.0,  # 일관성 있는 법률 분석을 위해 창의성 제한
                 response_mime_type="application/json",
                 response_schema=ContractAnalysisResult,
             ),
