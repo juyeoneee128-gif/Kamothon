@@ -759,8 +759,8 @@ from gemini_analyzer import DEMO_MODE, get_demo_result
 
 if 'analysis_complete' not in st.session_state:
     st.session_state.analysis_complete = False
-if 'uploaded_image' not in st.session_state:
-    st.session_state.uploaded_image = None
+if 'uploaded_images' not in st.session_state:
+    st.session_state.uploaded_images = []
 if 'analysis_result' not in st.session_state:
     st.session_state.analysis_result = None
 if 'analysis_error' not in st.session_state:
@@ -780,22 +780,23 @@ if DEMO_MODE:
     st.session_state.analysis_complete = True
 
 if not st.session_state.analysis_complete:
-    uploaded_file = st.file_uploader(
+    uploaded_files = st.file_uploader(
         "계약서 이미지 선택",
         type=['png', 'jpg', 'jpeg'],
-        help="계약서 사진을 드래그하거나 클릭해서 업로드하세요",
+        help="계약서 사진을 드래그하거나 클릭해서 업로드하세요 (여러 장 선택 가능)",
         label_visibility="collapsed",
-        key="contract_uploader"
+        key="contract_uploader",
+        accept_multiple_files=True
     )
     
-    if uploaded_file is None:
+    if not uploaded_files:
         st.markdown("""
         <div style="text-align: center; max-width: 800px; margin: 0 auto;">
             <span class="privacy-badge">🔒 이미지는 분석 후 즉시 삭제됩니다</span>
         </div>
         """, unsafe_allow_html=True)
     else:
-        st.session_state.uploaded_image = uploaded_file
+        st.session_state.uploaded_images = uploaded_files
         
         st.markdown('''<style>
             [data-testid="stFileUploader"],
@@ -818,13 +819,16 @@ if not st.session_state.analysis_complete:
         if analyze_clicked:
             with st.spinner("AI가 계약서를 읽고 분석하고 있어요... 잠시만요! 📖"):
                 try:
-                    from gemini_analyzer import analyze_contract_image
+                    from gemini_analyzer import analyze_contract_images
                     
-                    uploaded_file.seek(0)
-                    image_bytes = uploaded_file.read()
-                    mime_type = get_mime_type(uploaded_file.name)
+                    image_data_list = []
+                    for uf in uploaded_files:
+                        uf.seek(0)
+                        image_bytes = uf.read()
+                        mime_type = get_mime_type(uf.name)
+                        image_data_list.append((image_bytes, mime_type))
                     
-                    result = analyze_contract_image(image_bytes, mime_type)
+                    result = analyze_contract_images(image_data_list)
                     
                     if result:
                         st.session_state.analysis_result = result
@@ -843,11 +847,20 @@ if not st.session_state.analysis_complete:
         
         cancel_clicked = st.button("✕", key="cancel_upload", help="업로드 취소")
         if cancel_clicked:
-            st.session_state.uploaded_image = None
+            st.session_state.uploaded_images = []
             st.rerun()
         
-        image = Image.open(uploaded_file)
-        st.image(image, use_container_width=True)
+        if len(uploaded_files) == 1:
+            image = Image.open(uploaded_files[0])
+            st.image(image, use_container_width=True)
+        else:
+            st.markdown(f'<p style="text-align:center; color: var(--text-secondary); margin-bottom: 1rem;">📄 {len(uploaded_files)}장의 이미지가 선택됨</p>', unsafe_allow_html=True)
+            cols = st.columns(min(len(uploaded_files), 3))
+            for idx, uf in enumerate(uploaded_files):
+                with cols[idx % 3]:
+                    img = Image.open(uf)
+                    st.image(img, use_container_width=True)
+        
         st.markdown('</div>', unsafe_allow_html=True)
         
         if st.session_state.analysis_error:
