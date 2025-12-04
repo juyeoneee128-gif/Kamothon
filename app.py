@@ -783,9 +783,30 @@ def get_mime_type(filename: str) -> str:
     mime_types = {
         'jpg': 'image/jpeg',
         'jpeg': 'image/jpeg',
-        'png': 'image/png'
+        'png': 'image/png',
+        'pdf': 'application/pdf'
     }
     return mime_types.get(ext, 'image/jpeg')
+
+def is_pdf(filename: str) -> bool:
+    return filename.lower().endswith('.pdf')
+
+def pdf_to_images(pdf_bytes: bytes) -> list[tuple[bytes, str]]:
+    """Convert PDF pages to PNG images using PyMuPDF."""
+    import fitz
+    import io
+    
+    images = []
+    pdf_doc = fitz.open(stream=pdf_bytes, filetype="pdf")
+    
+    for page_num in range(len(pdf_doc)):
+        page = pdf_doc[page_num]
+        pix = page.get_pixmap(dpi=150)
+        img_bytes = pix.tobytes("png")
+        images.append((img_bytes, "image/png"))
+    
+    pdf_doc.close()
+    return images
 
 if DEMO_MODE:
     st.session_state.analysis_result = get_demo_result()
@@ -793,9 +814,9 @@ if DEMO_MODE:
 
 if not st.session_state.analysis_complete:
     uploaded_files = st.file_uploader(
-        "계약서 이미지 선택",
-        type=['png', 'jpg', 'jpeg'],
-        help="계약서 사진을 드래그하거나 클릭해서 업로드하세요 (여러 장 선택 가능)",
+        "계약서 이미지 또는 PDF 선택",
+        type=['png', 'jpg', 'jpeg', 'pdf'],
+        help="계약서 사진 또는 PDF를 드래그하거나 클릭해서 업로드하세요 (여러 개 선택 가능)",
         label_visibility="collapsed",
         key="contract_uploader",
         accept_multiple_files=True
@@ -836,9 +857,14 @@ if not st.session_state.analysis_complete:
                     image_data_list = []
                     for uf in uploaded_files:
                         uf.seek(0)
-                        image_bytes = uf.read()
-                        mime_type = get_mime_type(uf.name)
-                        image_data_list.append((image_bytes, mime_type))
+                        file_bytes = uf.read()
+                        
+                        if is_pdf(uf.name):
+                            pdf_images = pdf_to_images(file_bytes)
+                            image_data_list.extend(pdf_images)
+                        else:
+                            mime_type = get_mime_type(uf.name)
+                            image_data_list.append((file_bytes, mime_type))
                     
                     result = analyze_contract_images(image_data_list)
                     
@@ -855,15 +881,28 @@ if not st.session_state.analysis_complete:
                     
             st.rerun()
         
-        st.markdown(f'<p style="text-align:center; color: var(--text-secondary); margin-bottom: 1rem;">📄 {len(uploaded_files)}장의 이미지가 선택됨</p>', unsafe_allow_html=True)
+        pdf_count = sum(1 for uf in uploaded_files if is_pdf(uf.name))
+        img_count = len(uploaded_files) - pdf_count
+        
+        file_desc_parts = []
+        if img_count > 0:
+            file_desc_parts.append(f"이미지 {img_count}장")
+        if pdf_count > 0:
+            file_desc_parts.append(f"PDF {pdf_count}개")
+        file_desc = ", ".join(file_desc_parts)
+        
+        st.markdown(f'<p style="text-align:center; color: var(--text-secondary); margin-bottom: 1rem;">📄 {file_desc} 선택됨</p>', unsafe_allow_html=True)
         
         num_cols = min(len(uploaded_files), 4)
         cols = st.columns(num_cols)
         for idx, uf in enumerate(uploaded_files):
             with cols[idx % num_cols]:
-                img = Image.open(uf)
                 st.markdown('<div class="uploaded-preview">', unsafe_allow_html=True)
-                st.image(img, use_container_width=True)
+                if is_pdf(uf.name):
+                    st.markdown(f'<div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; color: var(--text-secondary);"><span style="font-size:2rem;">📑</span><span style="font-size:0.75rem; margin-top:0.5rem;">PDF</span></div>', unsafe_allow_html=True)
+                else:
+                    img = Image.open(uf)
+                    st.image(img, use_container_width=True)
                 st.markdown('</div>', unsafe_allow_html=True)
         
         col1, col2, col3 = st.columns([1, 1, 1])

@@ -5,7 +5,7 @@ integrations = ["python_gemini:1.0.0"]
 
 [nix]
 channel = "stable-25_05"
-packages = ["killall"]
+packages = ["freetype", "gumbo", "harfbuzz", "jbig2dec", "killall", "libjpeg_turbo", "libxcrypt", "mupdf", "openjpeg", "swig", "xcbuild"]
 
 [workflows]
 runButton = "Project"
@@ -38,6 +38,10 @@ externalPort = 80
 [[ports]]
 localPort = 8501
 externalPort = 3000
+
+[[ports]]
+localPort = 36011
+externalPort = 5000
 
 [[ports]]
 localPort = 40123
