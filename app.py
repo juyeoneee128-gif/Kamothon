@@ -1080,32 +1080,74 @@ if not st.session_state.analysis_complete:
                 img_base64 = base64.b64encode(buffered.getvalue()).decode()
                 preview_html += f'<div class="preview-item"><div class="uploaded-preview"><img src="data:image/png;base64,{img_base64}" /></div></div>'
         
-        preview_html += '''<div class="preview-item">
-            <div class="add-image-btn">
-                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                    <circle cx="8.5" cy="8.5" r="1.5"></circle>
-                    <polyline points="21 15 16 10 5 21"></polyline>
-                </svg>
-            </div>
-        </div>'''
         preview_html += '</div>'
         
         st.markdown(preview_html, unsafe_allow_html=True)
         
-        col1, col2, col3 = st.columns([1, 2, 1])
+        st.markdown("""
+        <style>
+        .add-upload-wrapper {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 1rem;
+        }
+        .add-upload-wrapper .stButton {
+            width: 200px !important;
+        }
+        .add-upload-wrapper .stButton button {
+            width: 200px !important;
+            height: 200px !important;
+            background: var(--bg-card) !important;
+            border: 2px dashed var(--border-color) !important;
+            border-radius: 8px !important;
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: center !important;
+            justify-content: center !important;
+            color: var(--text-muted) !important;
+            transition: all 0.2s ease !important;
+            padding: 0 !important;
+        }
+        .add-upload-wrapper .stButton button:hover {
+            border-color: var(--accent-yellow) !important;
+            background: #FFFEF5 !important;
+            color: var(--text-secondary) !important;
+        }
+        .add-upload-wrapper .stButton button:active {
+            border-color: var(--accent-yellow-hover) !important;
+            background: #FEF9E7 !important;
+            transform: scale(0.98) !important;
+        }
+        .add-upload-wrapper .stButton button p {
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: center !important;
+            gap: 0.5rem !important;
+            margin: 0 !important;
+        }
+        </style>
+        """, unsafe_allow_html=True)
+        
+        add_col1, add_col2, add_col3 = st.columns([1, 1, 1])
+        with add_col2:
+            st.markdown('<div class="add-upload-wrapper">', unsafe_allow_html=True)
+            add_btn_content = """<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin-bottom: 8px;">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                <polyline points="21 15 16 10 5 21"></polyline>
+            </svg><br>파일 추가"""
+            if st.button("📷\n\n파일 추가", key="add_more", disabled=is_analyzing):
+                st.session_state.show_add_uploader = True
+                st.session_state.add_uploader_key += 1
+                st.rerun()
+            st.markdown('</div>', unsafe_allow_html=True)
+        
+        col1, col2, col3 = st.columns([1, 1, 1])
         with col2:
-            btn_col1, btn_col2 = st.columns(2)
-            with btn_col1:
-                if st.button("➕ 파일 추가", key="add_more", use_container_width=True, disabled=is_analyzing):
-                    st.session_state.show_add_uploader = True
-                    st.session_state.add_uploader_key += 1
-                    st.rerun()
-            with btn_col2:
-                if st.button("🗑️ 전체 삭제", key="cancel_all", use_container_width=True, disabled=is_analyzing):
-                    reset_manifest()
-                    st.session_state.uploader_key += 1
-                    st.rerun()
+            if st.button("🗑️ 전체 삭제", key="cancel_all", use_container_width=True, disabled=is_analyzing):
+                reset_manifest()
+                st.session_state.uploader_key += 1
+                st.rerun()
         
         if st.session_state.analysis_error:
             st.error(f"😥 {st.session_state.analysis_error}")
