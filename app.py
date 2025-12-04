@@ -880,6 +880,10 @@ if 'show_add_uploader' not in st.session_state:
     st.session_state.show_add_uploader = False
 if 'add_uploader_key' not in st.session_state:
     st.session_state.add_uploader_key = 0
+if 'chat_messages' not in st.session_state:
+    st.session_state.chat_messages = []
+if 'contract_context' not in st.session_state:
+    st.session_state.contract_context = ""
 
 import hashlib
 
@@ -1033,6 +1037,8 @@ if not st.session_state.analysis_complete:
                 st.session_state.analysis_result = analysis_result["result"]
                 st.session_state.analysis_complete = True
                 st.session_state.analysis_error = None
+                st.session_state.contract_context = analysis_result["result"].extracted_text
+                st.session_state.chat_messages = []
             else:
                 st.session_state.analysis_error = "분석 결과를 받지 못했어요. 다시 시도해주세요!"
                     
