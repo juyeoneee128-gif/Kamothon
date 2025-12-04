@@ -976,6 +976,54 @@ if not st.session_state.analysis_complete:
     
     if has_files:
         if not is_analyzing:
+            manifest = st.session_state.file_manifest
+            
+            import base64
+            from io import BytesIO
+            
+            total_files = len(manifest)
+            
+            st.markdown(f'<p style="text-align:center; color: var(--text-secondary); margin-bottom: 0.75rem; font-size: 0.875rem;">📄 총 {total_files}개 파일 선택됨</p>', unsafe_allow_html=True)
+            
+            file_hashes = list(manifest.keys())
+            
+            preview_html = '<div class="preview-grid">'
+            for file_hash in file_hashes:
+                file_info = manifest[file_hash]
+                if file_info["mime"] == "application/pdf":
+                    name = file_info["name"]
+                    preview_html += f'''<div class="preview-item">
+                        <div class="uploaded-preview" style="display: flex; flex-direction: column; align-items: center; justify-content: center; background: #FEF3C7;">
+                            <div style="font-size: 3rem;">📄</div>
+                            <div style="font-size: 0.7rem; color: #92400E; margin-top: 0.5rem; text-align: center; word-break: break-all; padding: 0 0.5rem;">{name[:15]}{"..." if len(name) > 15 else ""}</div>
+                        </div>
+                    </div>'''
+                else:
+                    img = Image.open(BytesIO(file_info["bytes"]))
+                    img.thumbnail((160, 160))
+                    buffered = BytesIO()
+                    img.save(buffered, format="PNG")
+                    img_base64 = base64.b64encode(buffered.getvalue()).decode()
+                    preview_html += f'<div class="preview-item"><div class="uploaded-preview"><img src="data:image/png;base64,{img_base64}" /></div></div>'
+            
+            preview_html += '</div>'
+            
+            st.markdown(preview_html, unsafe_allow_html=True)
+            
+            col1, col2, col3 = st.columns([1, 2, 1])
+            with col2:
+                btn_col1, btn_col2 = st.columns(2)
+                with btn_col1:
+                    if st.button("➕ 파일 추가", key="add_more", use_container_width=True):
+                        st.session_state.show_add_uploader = True
+                        st.session_state.add_uploader_key += 1
+                        st.rerun()
+                with btn_col2:
+                    if st.button("🗑️ 전체 삭제", key="cancel_all", use_container_width=True):
+                        reset_manifest()
+                        st.session_state.uploader_key += 1
+                        st.rerun()
+            
             col1, col2, col3 = st.columns([1, 2, 1])
             with col2:
                 analyze_clicked = st.button("🔍 계약서 분석하기", type="primary", use_container_width=True)
@@ -983,6 +1031,12 @@ if not st.session_state.analysis_complete:
             if analyze_clicked:
                 st.session_state.is_analyzing = True
                 st.rerun()
+            
+            if st.session_state.analysis_error:
+                st.error(f"😥 {st.session_state.analysis_error}")
+                if st.button("🔄 다시 시도하기"):
+                    st.session_state.analysis_error = None
+                    st.rerun()
         
         if is_analyzing:
             progress_messages = [
@@ -1056,61 +1110,6 @@ if not st.session_state.analysis_complete:
             st.rerun()
         
         st.stop()
-    
-    manifest = st.session_state.file_manifest
-    pdf_count = sum(1 for f in manifest.values() if f["mime"] == "application/pdf")
-    img_count = len(manifest) - pdf_count
-    
-    import base64
-    from io import BytesIO
-    
-    total_files = len(manifest)
-    
-    st.markdown(f'<p style="text-align:center; color: var(--text-secondary); margin-bottom: 0.75rem; font-size: 0.875rem;">📄 총 {total_files}개 파일 선택됨</p>', unsafe_allow_html=True)
-    
-    file_hashes = list(manifest.keys())
-    
-    preview_html = '<div class="preview-grid">'
-    for file_hash in file_hashes:
-        file_info = manifest[file_hash]
-        if file_info["mime"] == "application/pdf":
-            name = file_info["name"]
-            preview_html += f'''<div class="preview-item">
-                <div class="uploaded-preview" style="display: flex; flex-direction: column; align-items: center; justify-content: center; background: #FEF3C7;">
-                    <div style="font-size: 3rem;">📄</div>
-                    <div style="font-size: 0.7rem; color: #92400E; margin-top: 0.5rem; text-align: center; word-break: break-all; padding: 0 0.5rem;">{name[:15]}{"..." if len(name) > 15 else ""}</div>
-                </div>
-            </div>'''
-        else:
-            img = Image.open(BytesIO(file_info["bytes"]))
-            img.thumbnail((160, 160))
-            buffered = BytesIO()
-            img.save(buffered, format="PNG")
-            img_base64 = base64.b64encode(buffered.getvalue()).decode()
-            preview_html += f'<div class="preview-item"><div class="uploaded-preview"><img src="data:image/png;base64,{img_base64}" /></div></div>'
-    
-    preview_html += '</div>'
-    
-    st.markdown(preview_html, unsafe_allow_html=True)
-    col1, col2, col3 = st.columns([1, 2, 1])
-    with col2:
-        btn_col1, btn_col2 = st.columns(2)
-        with btn_col1:
-            if st.button("➕ 파일 추가", key="add_more", use_container_width=True):
-                st.session_state.show_add_uploader = True
-                st.session_state.add_uploader_key += 1
-                st.rerun()
-        with btn_col2:
-            if st.button("🗑️ 전체 삭제", key="cancel_all", use_container_width=True):
-                reset_manifest()
-                st.session_state.uploader_key += 1
-                st.rerun()
-    
-    if st.session_state.analysis_error:
-        st.error(f"😥 {st.session_state.analysis_error}")
-        if st.button("🔄 다시 시도하기"):
-            st.session_state.analysis_error = None
-            st.rerun()
 
 else:
     result = st.session_state.analysis_result
