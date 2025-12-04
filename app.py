@@ -979,13 +979,14 @@ if not st.session_state.analysis_complete:
         """, unsafe_allow_html=True)
     
     if has_files:
-        col1, col2, col3 = st.columns([1, 2, 1])
-        with col2:
-            analyze_clicked = st.button("🔍 계약서 분석하기", type="primary", use_container_width=True, disabled=is_analyzing)
-        
-        if analyze_clicked:
-            st.session_state.is_analyzing = True
-            st.rerun()
+        if not is_analyzing:
+            col1, col2, col3 = st.columns([1, 2, 1])
+            with col2:
+                analyze_clicked = st.button("🔍 계약서 분석하기", type="primary", use_container_width=True)
+            
+            if analyze_clicked:
+                st.session_state.is_analyzing = True
+                st.rerun()
         
         if is_analyzing:
             progress_messages = [
@@ -1096,19 +1097,20 @@ if not st.session_state.analysis_complete:
         
         st.markdown(preview_html, unsafe_allow_html=True)
         
-        col1, col2, col3 = st.columns([1, 2, 1])
-        with col2:
-            btn_col1, btn_col2 = st.columns(2)
-            with btn_col1:
-                if st.button("➕ 파일 추가", key="add_more", use_container_width=True, disabled=is_analyzing):
-                    st.session_state.show_add_uploader = True
-                    st.session_state.add_uploader_key += 1
-                    st.rerun()
-            with btn_col2:
-                if st.button("🗑️ 전체 삭제", key="cancel_all", use_container_width=True, disabled=is_analyzing):
-                    reset_manifest()
-                    st.session_state.uploader_key += 1
-                    st.rerun()
+        if not is_analyzing:
+            col1, col2, col3 = st.columns([1, 2, 1])
+            with col2:
+                btn_col1, btn_col2 = st.columns(2)
+                with btn_col1:
+                    if st.button("➕ 파일 추가", key="add_more", use_container_width=True):
+                        st.session_state.show_add_uploader = True
+                        st.session_state.add_uploader_key += 1
+                        st.rerun()
+                with btn_col2:
+                    if st.button("🗑️ 전체 삭제", key="cancel_all", use_container_width=True):
+                        reset_manifest()
+                        st.session_state.uploader_key += 1
+                        st.rerun()
         
         if st.session_state.analysis_error:
             st.error(f"😥 {st.session_state.analysis_error}")
