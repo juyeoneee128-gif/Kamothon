@@ -692,8 +692,33 @@ st.markdown("""
     }
     
     .analyze-button-container {
-        max-width: 240px;
+        max-width: 180px;
         margin: 0 auto 1rem auto;
+    }
+    
+    .add-image-btn {
+        width: 200px;
+        height: 200px;
+        background: var(--bg-card);
+        border: 2px dashed var(--border-color);
+        border-radius: 8px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        color: var(--text-muted);
+        transition: all 0.2s ease;
+    }
+    
+    .add-image-btn:hover {
+        border-color: var(--accent);
+        color: var(--text-secondary);
+    }
+    
+    .add-image-btn span {
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
     }
     
     .hide-uploader [data-testid="stFileUploader"] {
@@ -986,13 +1011,14 @@ if not st.session_state.analysis_complete:
                 img.save(buffered, format="PNG")
                 img_base64 = base64.b64encode(buffered.getvalue()).decode()
                 preview_html += f'<div class="preview-item"><div class="uploaded-preview"><img src="data:image/png;base64,{img_base64}" /></div></div>'
+        preview_html += '<div class="preview-item"><div class="add-image-btn" onclick="document.querySelector(\'[data-testid=stFileUploader] input\').click()"><span>+</span><small>추가</small></div></div>'
         preview_html += '</div>'
         
         st.markdown(preview_html, unsafe_allow_html=True)
         
         col1, col2, col3 = st.columns([1, 1, 1])
         with col2:
-            if st.button("🗑️ 전체 취소", key="cancel_all", use_container_width=True):
+            if st.button("🗑️ 업로드 취소", key="cancel_all", use_container_width=True):
                 st.rerun()
         
         if st.session_state.analysis_error:
