@@ -692,8 +692,12 @@ st.markdown("""
     }
     
     .analyze-button-container {
-        max-width: 180px;
+        max-width: 720px;
         margin: 0 auto 1rem auto;
+    }
+    
+    .analyze-button-container button {
+        width: 100% !important;
     }
     
     .add-image-btn {
