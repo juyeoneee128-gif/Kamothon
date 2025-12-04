@@ -1297,6 +1297,8 @@ else:
             st.session_state.uploaded_image = None
             st.session_state.analysis_result = None
             st.session_state.analysis_error = None
+            st.session_state.file_manifest = {}
+            st.session_state.uploader_key += 1
             st.rerun()
 
 st.markdown("""
