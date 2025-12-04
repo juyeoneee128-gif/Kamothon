@@ -114,11 +114,8 @@ ContractAnalysisResult:
 
 ## Recent Changes
 - **2024-12-04**:
-  - **Chat Feature Added**:
-    - backend.py: Added `chat_with_contract(user_question, contract_context)` function
-    - Uses Gemini API to answer follow-up questions about the contract
-    - Session state stores `contract_context` and `chat_messages`
-    - Chat UI on results page with message history and input field
+  - **Chat Feature Removed**: Reverted chat functionality per user request
+  - **Analysis UX Improvement**: During analysis, only progress bar shown (file preview and buttons hidden)
   - **Preview Grid UX Update**:
     - "이미지 추가" button now appears as last item in preview grid
     - X delete button overlays each preview item
