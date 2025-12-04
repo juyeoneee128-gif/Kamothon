@@ -4,7 +4,7 @@ import io
 import os
 
 st.set_page_config(
-    page_title="계약서 리스크 하이라이터",
+    page_title="계약 지키미",
     page_icon="🛡️",
     layout="wide",
     initial_sidebar_state="collapsed"
@@ -861,7 +861,7 @@ st.markdown("""
 <div class="brand-header">
     <div class="brand-title-row">
         <div class="brand-icon">📋</div>
-        <div class="brand-title">계약서 리스크 하이라이터</div>
+        <div class="brand-title">계약 지키미</div>
     </div>
 </div>
 <div class="header-spacer"></div>
@@ -1256,7 +1256,7 @@ else:
 
 st.markdown("""
 <div class="footer-mini">
-    🛡️ 계약서 리스크 하이라이터 | 당신의 권리를 지켜드립니다<br>
+    🛡️ 계약 지키미 | 당신의 권리를 지켜드립니다<br>
     <small>* 본 서비스는 참고용이며, 법률 자문을 대체하지 않습니다.</small>
 </div>
 """, unsafe_allow_html=True)

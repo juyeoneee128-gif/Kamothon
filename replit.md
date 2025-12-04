@@ -1,4 +1,4 @@
-# 계약서 리스크 하이라이터 (Contract Risk Highlighter)
+# 계약 지키미 (Contract Risk Highlighter)
 
 ## Overview
 AI-based contract risk analysis service for young workers and part-time employees. Uses Gemini Vision LLM to identify risky clauses in employment contracts and provides communication scripts for negotiation.
