@@ -976,6 +976,18 @@ if not st.session_state.analysis_complete:
     
     if has_files:
         if is_analyzing:
+            st.markdown("""
+            <style>
+                .stButton, [data-testid="stButton"] {
+                    display: none !important;
+                    visibility: hidden !important;
+                }
+                .preview-grid, .preview-item, .uploaded-preview {
+                    display: none !important;
+                }
+            </style>
+            """, unsafe_allow_html=True)
+            
             progress_messages = [
                 ("📄 계약서 이미지를 읽고 있어요...", 0.08),
                 ("🔍 사진을 인식하고 있어요...", 0.18),
