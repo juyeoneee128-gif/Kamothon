@@ -854,10 +854,6 @@ st.markdown("""
     <div class="brand-subtitle">사회 초년생의 권리를 지키는 AI 기반 계약서 리스크 분석 서비스</div>
 </div>
 <div class="header-spacer"></div>
-<div class="privacy-banner">
-    <span class="privacy-banner-icon">🔒</span>
-    <span>개인 정보는 자동 마스킹됩니다.</span>
-</div>
 """, unsafe_allow_html=True)
 
 from gemini_analyzer import DEMO_MODE, get_demo_result
@@ -930,6 +926,14 @@ if DEMO_MODE:
 if not st.session_state.analysis_complete:
     is_analyzing = st.session_state.is_analyzing
     has_files = len(st.session_state.file_manifest) > 0
+    
+    if not has_files:
+        st.markdown("""
+        <div class="privacy-banner">
+            <span class="privacy-banner-icon">🔒</span>
+            <span>개인 정보는 자동 마스킹됩니다.</span>
+        </div>
+        """, unsafe_allow_html=True)
     
     if not has_files or st.session_state.show_add_uploader:
         uploader_label = "추가할 파일 선택" if has_files else "계약서 이미지 또는 PDF 선택"
