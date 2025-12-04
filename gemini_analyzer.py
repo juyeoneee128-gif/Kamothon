@@ -918,7 +918,7 @@ def chat_with_contract(question: str, contract_text: str = "", use_rag: bool = T
         if vectorstore:
             # Search for relevant documents
             retriever = vectorstore.as_retriever(search_kwargs={"k": 3})
-            docs = retriever.get_relevant_documents(question)
+            docs = retriever.invoke(question)  # Updated method name for newer langchain
             context_sources = [doc.page_content for doc in docs]
 
     # Build prompt
