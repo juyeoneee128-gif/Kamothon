@@ -954,7 +954,7 @@ if not st.session_state.analysis_complete:
     if not has_files and not st.session_state.show_add_uploader:
         st.markdown("""
         <div style="text-align: center; max-width: 800px; margin: 0 auto;">
-            <span class="privacy-badge">🔒 이미지는 분석 후 즉시 삭제됩니다</span>
+            <span class="privacy-badge">🔒 이미지는 절대 저장되지 않아요</span>
         </div>
         """, unsafe_allow_html=True)
     
