@@ -104,8 +104,8 @@ class AnalysisItem(BaseModel):
     script: str
 
 class ContractAnalysisResult(BaseModel):
-    contract_text: str
-    analysis: list[AnalysisItem]
+    extracted_text: str
+    risk_clauses: list[AnalysisItem]
     summary: str
 
 
@@ -175,8 +175,8 @@ def get_demo_result() -> ContractAnalysisResult:
     ]
 
     return ContractAnalysisResult(
-        contract_text=demo_contract_text,
-        analysis=demo_analysis,
+        extracted_text=demo_contract_text,
+        risk_clauses=demo_analysis,
         summary="총 5개의 위험 조항이 발견됐어요. 특히 🚨 표시된 휴게시간과 해고 관련 조항은 꼭 짚고 넘어가야 해요! 나머지도 하나씩 체크해서 손해보지 말자고요 💪"
     )
 
@@ -289,11 +289,11 @@ def analyze_contract_image(image_bytes: bytes, mime_type: str = "image/jpeg") ->
 반드시 아래 JSON 포맷으로 출력해주세요:
 
 {{
-    "contract_text": "줄바꿈이 교정된 계약서 원문",
-    "analysis": [
+    "extracted_text": "줄바꿈이 교정된 계약서 원문",
+    "risk_clauses": [
         {{
             "category": "🚨 위반 항목 제목 (예: 퇴직금 미지급 조항)",
-            "original_text": "문제가 된 계약서 문구 (하이라이트용 - contract_text에 포함된 정확한 문장)",
+            "original_text": "문제가 된 계약서 문구 (하이라이트용 - extracted_text에 포함된 정확한 문장)",
             "explanation": "이게 왜 문제인지 친구에게 설명하듯이 쉽고 친절하게 작성 (해요체 필수! 법적 근거도 자연스럽게 포함)",
             "script": "사장님께 보낼 정중하지만 단호한 요청 메시지 (그대로 복사해서 쓸 수 있게)"
         }}
@@ -302,7 +302,7 @@ def analyze_contract_image(image_bytes: bytes, mime_type: str = "image/jpeg") ->
 }}
 
 **중요:**
-- original_text는 반드시 contract_text에 포함된 정확한 문장이어야 해요 (하이라이트 표시에 사용)
+- original_text는 반드시 extracted_text에 포함된 정확한 문장이어야 해요 (하이라이트 표시에 사용)
 - category는 이모지를 포함한 간결한 제목으로 (🚨 위험, ⚠️ 주의, 💡 참고)
 - explanation은 법적 근거를 포함하되 친구에게 설명하듯 자연스럽게 작성
 - script는 실제로 사용할 수 있는 정중하고 명확한 요청 문구로
@@ -455,11 +455,11 @@ def analyze_contract_images(image_data_list: list[tuple[bytes, str]]) -> Optiona
 반드시 아래 JSON 포맷으로 출력해주세요:
 
 {{
-    "contract_text": "줄바꿈이 교정된 계약서 원문",
-    "analysis": [
+    "extracted_text": "줄바꿈이 교정된 계약서 원문",
+    "risk_clauses": [
         {{
             "category": "🚨 위반 항목 제목 (예: 퇴직금 미지급 조항)",
-            "original_text": "문제가 된 계약서 문구 (하이라이트용 - contract_text에 포함된 정확한 문장)",
+            "original_text": "문제가 된 계약서 문구 (하이라이트용 - extracted_text에 포함된 정확한 문장)",
             "explanation": "이게 왜 문제인지 친구에게 설명하듯이 쉽고 친절하게 작성 (해요체 필수! 법적 근거도 자연스럽게 포함)",
             "script": "사장님께 보낼 정중하지만 단호한 요청 메시지 (그대로 복사해서 쓸 수 있게)"
         }}
@@ -468,7 +468,7 @@ def analyze_contract_images(image_data_list: list[tuple[bytes, str]]) -> Optiona
 }}
 
 **중요:**
-- original_text는 반드시 contract_text에 포함된 정확한 문장이어야 해요 (하이라이트 표시에 사용)
+- original_text는 반드시 extracted_text에 포함된 정확한 문장이어야 해요 (하이라이트 표시에 사용)
 - category는 이모지를 포함한 간결한 제목으로 (🚨 위험, ⚠️ 주의, 💡 참고)
 - explanation은 법적 근거를 포함하되 친구에게 설명하듯 자연스럽게 작성
 - script는 실제로 사용할 수 있는 정중하고 명확한 요청 문구로
@@ -557,11 +557,11 @@ def analyze_contract_files(file_data_list: list[tuple[bytes, str]]) -> Optional[
 반드시 아래 JSON 포맷으로 출력하세요:
 
 {{
-    "contract_text": "줄바꿈이 교정된 계약서 원문",
-    "analysis": [
+    "extracted_text": "줄바꿈이 교정된 계약서 원문",
+    "risk_clauses": [
         {{
             "category": "🚨 위반 항목 제목 (예: 퇴직금 미지급 조항)",
-            "original_text": "문제가 된 계약서 문구 (하이라이트용 - contract_text에 포함된 정확한 문장)",
+            "original_text": "문제가 된 계약서 문구 (하이라이트용 - extracted_text에 포함된 정확한 문장)",
             "explanation": "이게 왜 문제인지 친구에게 설명하듯이 쉽고 친절하게 작성 (해요체 필수! 법적 근거도 자연스럽게 포함)",
             "script": "사장님께 보낼 정중하지만 단호한 요청 메시지 (그대로 복사해서 쓸 수 있게)"
         }}
@@ -570,7 +570,7 @@ def analyze_contract_files(file_data_list: list[tuple[bytes, str]]) -> Optional[
 }}
 
 **중요:**
-- original_text는 반드시 contract_text에 포함된 정확한 문장이어야 합니다 (하이라이트 표시에 사용)
+- original_text는 반드시 extracted_text에 포함된 정확한 문장이어야 합니다 (하이라이트 표시에 사용)
 - category는 이모지를 포함한 간결한 제목으로 (🚨 위험, ⚠️ 주의, 💡 참고)
 - explanation은 법적 근거를 포함하되 친구에게 설명하듯 자연스럽게 작성
 - script는 실제로 사용할 수 있는 정중하고 명확한 요청 문구로
