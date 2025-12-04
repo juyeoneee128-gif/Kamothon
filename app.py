@@ -1060,122 +1060,52 @@ if not st.session_state.analysis_complete:
         st.markdown(f'<p style="text-align:center; color: var(--text-secondary); margin-bottom: 0.75rem; font-size: 0.875rem;">📄 총 {total_files}개 파일 선택됨</p>', unsafe_allow_html=True)
         
         file_hashes = list(manifest.keys())
-        items_per_row = 3
         
-        st.markdown("""
-        <style>
-        .preview-cell {
-            position: relative;
-            width: 200px;
-            height: 200px;
-            margin: 0 auto;
-        }
-        .preview-cell .uploaded-preview {
-            width: 100%;
-            height: 100%;
-        }
-        .preview-cell .stButton {
-            position: absolute !important;
-            top: 8px !important;
-            right: 8px !important;
-            z-index: 100 !important;
-        }
-        .preview-cell .stButton button {
-            width: 28px !important;
-            height: 28px !important;
-            min-width: 28px !important;
-            min-height: 28px !important;
-            padding: 0 !important;
-            background: rgba(0,0,0,0.6) !important;
-            border: none !important;
-            border-radius: 50% !important;
-            color: white !important;
-            font-size: 0.85rem !important;
-            line-height: 1 !important;
-        }
-        .preview-cell .stButton button:hover {
-            background: rgba(0,0,0,0.8) !important;
-        }
-        .add-cell .stButton {
-            position: absolute !important;
-            top: 0 !important;
-            left: 0 !important;
-            right: 0 !important;
-            bottom: 0 !important;
-            width: 100% !important;
-            height: 100% !important;
-        }
-        .add-cell .stButton button {
-            width: 100% !important;
-            height: 100% !important;
-            background: transparent !important;
-            border: none !important;
-            color: transparent !important;
-            cursor: pointer !important;
-        }
-        .add-cell .stButton button:hover {
-            background: rgba(0,0,0,0.02) !important;
-        }
-        .add-cell .stButton button p {
-            display: none !important;
-        }
-        </style>
-        """, unsafe_allow_html=True)
+        preview_html = '<div class="preview-grid">'
+        for file_hash in file_hashes:
+            file_info = manifest[file_hash]
+            if file_info["mime"] == "application/pdf":
+                name = file_info["name"]
+                preview_html += f'''<div class="preview-item">
+                    <div class="uploaded-preview" style="display: flex; flex-direction: column; align-items: center; justify-content: center; background: #FEF3C7;">
+                        <div style="font-size: 3rem;">📄</div>
+                        <div style="font-size: 0.7rem; color: #92400E; margin-top: 0.5rem; text-align: center; word-break: break-all; padding: 0 0.5rem;">{name[:15]}{"..." if len(name) > 15 else ""}</div>
+                    </div>
+                </div>'''
+            else:
+                img = Image.open(BytesIO(file_info["bytes"]))
+                img.thumbnail((160, 160))
+                buffered = BytesIO()
+                img.save(buffered, format="PNG")
+                img_base64 = base64.b64encode(buffered.getvalue()).decode()
+                preview_html += f'<div class="preview-item"><div class="uploaded-preview"><img src="data:image/png;base64,{img_base64}" /></div></div>'
         
-        all_items = file_hashes + ["__add__"]
-        rows = [all_items[i:i+items_per_row] for i in range(0, len(all_items), items_per_row)]
+        preview_html += '''<div class="preview-item">
+            <div class="add-image-btn">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                    <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                    <polyline points="21 15 16 10 5 21"></polyline>
+                </svg>
+            </div>
+        </div>'''
+        preview_html += '</div>'
         
-        for row in rows:
-            cols = st.columns(items_per_row)
-            for col_idx, item in enumerate(row):
-                with cols[col_idx]:
-                    if item == "__add__":
-                        st.markdown('''
-                        <div class="preview-cell add-cell">
-                            <div class="add-image-btn">
-                                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                                    <circle cx="8.5" cy="8.5" r="1.5"></circle>
-                                    <polyline points="21 15 16 10 5 21"></polyline>
-                                </svg>
-                            </div>
-                        ''', unsafe_allow_html=True)
-                        if st.button(" ", key="add_more", disabled=is_analyzing):
-                            st.session_state.show_add_uploader = True
-                            st.session_state.add_uploader_key += 1
-                            st.rerun()
-                        st.markdown('</div>', unsafe_allow_html=True)
-                    else:
-                        file_hash = item
-                        file_info = manifest[file_hash]
-                        if file_info["mime"] == "application/pdf":
-                            name = file_info["name"]
-                            st.markdown(f'''
-                            <div class="preview-cell">
-                                <div class="uploaded-preview" style="display: flex; flex-direction: column; align-items: center; justify-content: center; background: #FEF3C7;">
-                                    <div style="font-size: 3rem;">📄</div>
-                                    <div style="font-size: 0.7rem; color: #92400E; margin-top: 0.5rem; text-align: center; word-break: break-all; padding: 0 0.5rem;">{name[:15]}{"..." if len(name) > 15 else ""}</div>
-                                </div>
-                            </div>
-                            ''', unsafe_allow_html=True)
-                        else:
-                            img = Image.open(BytesIO(file_info["bytes"]))
-                            img.thumbnail((160, 160))
-                            buffered = BytesIO()
-                            img.save(buffered, format="PNG")
-                            img_base64 = base64.b64encode(buffered.getvalue()).decode()
-                            st.markdown(f'''
-                            <div class="preview-cell">
-                                <div class="uploaded-preview"><img src="data:image/png;base64,{img_base64}" /></div>
-                            </div>
-                            ''', unsafe_allow_html=True)
+        st.markdown(preview_html, unsafe_allow_html=True)
         
-        st.markdown('<div style="text-align: center; margin-top: 1rem;">', unsafe_allow_html=True)
-        if st.button("🗑️ 전체 삭제", key="cancel_all", disabled=is_analyzing):
-            reset_manifest()
-            st.session_state.uploader_key += 1
-            st.rerun()
-        st.markdown('</div>', unsafe_allow_html=True)
+        col1, col2, col3 = st.columns([1, 2, 1])
+        with col2:
+            btn_col1, btn_col2 = st.columns(2)
+            with btn_col1:
+                if st.button("➕ 파일 추가", key="add_more", use_container_width=True, disabled=is_analyzing):
+                    st.session_state.show_add_uploader = True
+                    st.session_state.add_uploader_key += 1
+                    st.rerun()
+            with btn_col2:
+                if st.button("🗑️ 전체 삭제", key="cancel_all", use_container_width=True, disabled=is_analyzing):
+                    reset_manifest()
+                    st.session_state.uploader_key += 1
+                    st.rerun()
         
         if st.session_state.analysis_error:
             st.error(f"😥 {st.session_state.analysis_error}")
