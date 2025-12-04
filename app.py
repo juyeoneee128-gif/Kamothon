@@ -943,10 +943,9 @@ if not st.session_state.analysis_complete:
         </div>
         """, unsafe_allow_html=True)
     
-    if not has_files or st.session_state.show_add_uploader:
-        uploader_label = "추가할 파일 선택" if has_files else "계약서 이미지 또는 PDF 선택"
+    if not has_files:
         uploaded_files = st.file_uploader(
-            uploader_label,
+            "계약서 이미지 또는 PDF 선택",
             type=['png', 'jpg', 'jpeg', 'pdf'],
             help="계약서 사진 또는 PDF를 드래그하거나 클릭해서 업로드하세요 (여러 개 선택 가능)",
             label_visibility="collapsed",
@@ -958,16 +957,10 @@ if not st.session_state.analysis_complete:
         if uploaded_files:
             added = add_files_to_manifest(uploaded_files)
             if added > 0:
-                st.session_state.show_add_uploader = False
-                st.session_state.uploader_key += 1
-                st.rerun()
-            elif has_files:
-                st.toast("이미 추가된 파일이에요!", icon="ℹ️")
-                st.session_state.show_add_uploader = False
                 st.session_state.uploader_key += 1
                 st.rerun()
     
-    if not has_files and not st.session_state.show_add_uploader:
+    if not has_files:
         st.markdown("""
         <div style="text-align: center; max-width: 800px; margin: 0 auto;">
             <span class="privacy-badge">🔒 정보는 절대 저장되지 않아요</span>
@@ -1100,10 +1093,60 @@ if not st.session_state.analysis_complete:
             with col2:
                 btn_col1, btn_col2 = st.columns(2)
                 with btn_col1:
-                    if st.button("➕ 파일 추가", key="add_more", use_container_width=True):
-                        st.session_state.show_add_uploader = True
-                        st.session_state.add_uploader_key += 1
-                        st.rerun()
+                    st.markdown("""
+                    <style>
+                        .compact-uploader [data-testid="stFileUploader"] {
+                            max-width: 100% !important;
+                            margin: 0 !important;
+                        }
+                        .compact-uploader [data-testid="stFileUploader"] > div:first-child {
+                            display: none !important;
+                        }
+                        .compact-uploader [data-testid="stFileUploader"] section {
+                            background: var(--bg-subtle, #F4F4F5) !important;
+                            border: 1px solid var(--border-color, #E4E4E7) !important;
+                            border-radius: 8px !important;
+                            min-height: auto !important;
+                            padding: 0.75rem 1rem !important;
+                            box-shadow: none !important;
+                        }
+                        .compact-uploader [data-testid="stFileUploader"] section:hover {
+                            background: var(--border-color, #E4E4E7) !important;
+                        }
+                        .compact-uploader [data-testid="stFileUploaderDropzone"] {
+                            min-height: auto !important;
+                            padding: 0 !important;
+                        }
+                        .compact-uploader [data-testid="stFileUploaderDropzone"]::before {
+                            display: none !important;
+                        }
+                        .compact-uploader [data-testid="stFileUploaderDropzone"]::after {
+                            content: '➕ 파일 추가' !important;
+                            font-size: 0.9rem !important;
+                            font-weight: 600 !important;
+                            color: var(--text-tertiary, #71717A) !important;
+                        }
+                    </style>
+                    """, unsafe_allow_html=True)
+                    with st.container():
+                        st.markdown('<div class="compact-uploader">', unsafe_allow_html=True)
+                        add_files = st.file_uploader(
+                            "파일 추가",
+                            type=['png', 'jpg', 'jpeg', 'pdf'],
+                            label_visibility="collapsed",
+                            key=f"add_uploader_{st.session_state.add_uploader_key}",
+                            accept_multiple_files=True
+                        )
+                        st.markdown('</div>', unsafe_allow_html=True)
+                        if add_files:
+                            added = add_files_to_manifest(add_files)
+                            if added > 0:
+                                st.session_state.add_uploader_key += 1
+                                st.rerun()
+                            else:
+                                st.toast("이미 추가된 파일이에요!", icon="ℹ️")
+                                st.session_state.add_uploader_key += 1
+                                st.rerun()
                 with btn_col2:
                     if st.button("🗑️ 전체 삭제", key="cancel_all", use_container_width=True):
                         reset_manifest()
@@ -1116,7 +1159,6 @@ if not st.session_state.analysis_complete:
             
             if analyze_clicked:
                 st.session_state.is_analyzing = True
-                st.session_state.show_add_uploader = False
                 st.rerun()
             
             if st.session_state.analysis_error:
