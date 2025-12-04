@@ -1094,21 +1094,26 @@ if not st.session_state.analysis_complete:
         }
         .add-cell .stButton {
             position: absolute !important;
-            bottom: 12px !important;
-            right: 12px !important;
-            top: auto !important;
+            top: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            bottom: 0 !important;
+            width: 100% !important;
+            height: 100% !important;
         }
         .add-cell .stButton button {
-            width: 32px !important;
-            height: 32px !important;
-            min-width: 32px !important;
-            padding: 0 !important;
-            background: var(--text-muted) !important;
-            color: white !important;
-            border-radius: 50% !important;
+            width: 100% !important;
+            height: 100% !important;
+            background: transparent !important;
+            border: none !important;
+            color: transparent !important;
+            cursor: pointer !important;
         }
         .add-cell .stButton button:hover {
-            background: var(--text-secondary) !important;
+            background: rgba(0,0,0,0.02) !important;
+        }
+        .add-cell .stButton button p {
+            display: none !important;
         }
         </style>
         """, unsafe_allow_html=True)
@@ -1130,12 +1135,12 @@ if not st.session_state.analysis_complete:
                                     <polyline points="21 15 16 10 5 21"></polyline>
                                 </svg>
                             </div>
-                        </div>
                         ''', unsafe_allow_html=True)
-                        if st.button("➕", key="add_more", disabled=is_analyzing):
+                        if st.button(" ", key="add_more", disabled=is_analyzing):
                             st.session_state.show_add_uploader = True
                             st.session_state.add_uploader_key += 1
                             st.rerun()
+                        st.markdown('</div>', unsafe_allow_html=True)
                     else:
                         file_hash = item
                         file_info = manifest[file_hash]
