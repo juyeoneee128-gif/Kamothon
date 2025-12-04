@@ -819,6 +819,8 @@ if 'analysis_result' not in st.session_state:
     st.session_state.analysis_result = None
 if 'analysis_error' not in st.session_state:
     st.session_state.analysis_error = None
+if 'uploader_key' not in st.session_state:
+    st.session_state.uploader_key = 0
 
 def get_mime_type(filename: str) -> str:
     ext = filename.lower().split('.')[-1]
@@ -860,7 +862,7 @@ if not st.session_state.analysis_complete:
         type=['png', 'jpg', 'jpeg', 'pdf'],
         help="계약서 사진 또는 PDF를 드래그하거나 클릭해서 업로드하세요 (여러 개 선택 가능)",
         label_visibility="collapsed",
-        key="contract_uploader",
+        key=f"contract_uploader_{st.session_state.uploader_key}",
         accept_multiple_files=True
     )
     
@@ -1023,6 +1025,8 @@ if not st.session_state.analysis_complete:
         col1, col2, col3 = st.columns([1, 1, 1])
         with col2:
             if st.button("🗑️ 업로드 취소", key="cancel_all", use_container_width=True):
+                st.session_state.uploader_key += 1
+                st.session_state.uploaded_images = []
                 st.rerun()
         
         if st.session_state.analysis_error:
