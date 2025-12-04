@@ -1124,28 +1124,21 @@ if not st.session_state.analysis_complete:
             
             col1, col2, col3 = st.columns([1, 2, 1])
             with col2:
-                btn_col1, btn_col2 = st.columns(2)
-                with btn_col1:
-                    add_files = st.file_uploader(
-                        "파일 추가",
-                        type=['png', 'jpg', 'jpeg', 'pdf'],
-                        label_visibility="collapsed",
-                        key=f"add_uploader_{st.session_state.add_uploader_key}",
-                        accept_multiple_files=True
-                    )
-                    if add_files:
-                        added = add_files_to_manifest(add_files)
-                        if added > 0:
-                            st.session_state.add_uploader_key += 1
-                            st.rerun()
-                        else:
-                            st.toast("이미 추가된 파일이에요!", icon="ℹ️")
-                            st.session_state.add_uploader_key += 1
-                            st.rerun()
-                with btn_col2:
-                    if st.button("🗑️ 전체 삭제", key="cancel_all", use_container_width=True):
-                        reset_manifest()
-                        st.session_state.uploader_key += 1
+                add_files = st.file_uploader(
+                    "파일 추가",
+                    type=['png', 'jpg', 'jpeg', 'pdf'],
+                    label_visibility="collapsed",
+                    key=f"add_uploader_{st.session_state.add_uploader_key}",
+                    accept_multiple_files=True
+                )
+                if add_files:
+                    added = add_files_to_manifest(add_files)
+                    if added > 0:
+                        st.session_state.add_uploader_key += 1
+                        st.rerun()
+                    else:
+                        st.toast("이미 추가된 파일이에요!", icon="ℹ️")
+                        st.session_state.add_uploader_key += 1
                         st.rerun()
             
             col1, col2, col3 = st.columns([1, 2, 1])
