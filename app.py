@@ -1070,14 +1070,14 @@ if not st.session_state.analysis_complete:
         
         st.markdown(preview_html, unsafe_allow_html=True)
         
-        col1, col2 = st.columns([1, 1])
+        col1, col2, col3 = st.columns([1, 1, 1])
         with col1:
             add_more_clicked = st.button("➕ 이미지 추가", key="add_more", use_container_width=True, disabled=is_analyzing)
             if add_more_clicked:
                 st.session_state.show_add_uploader = True
                 st.session_state.add_uploader_key += 1
                 st.rerun()
-        with col2:
+        with col3:
             if st.button("🗑️ 업로드 취소", key="cancel_all", use_container_width=True, disabled=is_analyzing):
                 reset_manifest()
                 st.session_state.uploader_key += 1
