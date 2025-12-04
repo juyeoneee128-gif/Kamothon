@@ -12,3 +12,4 @@ unstructured==0.16.0
 pillow
 pydantic
 pymupdf
+sift-stack-py

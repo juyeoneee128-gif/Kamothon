@@ -5,7 +5,7 @@ integrations = ["python_gemini:1.0.0"]
 
 [nix]
 channel = "stable-25_05"
-packages = ["freetype", "gumbo", "harfbuzz", "jbig2dec", "killall", "libjpeg_turbo", "libxcrypt", "mupdf", "openjpeg", "swig", "xcbuild", "nano"]
+packages = ["freetype", "gumbo", "harfbuzz", "jbig2dec", "killall", "lcms2", "libimagequant", "libjpeg", "libjpeg_turbo", "libtiff", "libwebp", "libxcrypt", "mupdf", "nano", "openjpeg", "swig", "tcl", "tk", "xcbuild", "zlib"]
 
 [workflows]
 runButton = "Project"
