@@ -627,13 +627,13 @@ st.markdown("""
     /* ===== MISC ===== */
     .uploaded-preview {
         position: relative;
-        width: 80px;
-        height: 80px;
-        margin: 0 auto 0.5rem auto;
+        width: 200px;
+        height: 200px;
+        margin: 0;
         background: var(--bg-card);
         border: 1px solid var(--border-color);
         border-radius: 8px;
-        padding: 4px;
+        padding: 8px;
         box-shadow: var(--shadow-sm);
         overflow: hidden;
         display: flex;
@@ -652,8 +652,8 @@ st.markdown("""
         display: flex;
         flex-wrap: wrap;
         justify-content: center;
-        gap: 0.5rem;
-        max-width: 600px;
+        gap: 0.75rem;
+        max-width: 720px;
         margin: 0 auto 1rem auto;
     }
     
