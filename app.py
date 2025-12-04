@@ -886,22 +886,6 @@ def get_mime_type(filename: str) -> str:
 def is_pdf(filename: str) -> bool:
     return filename.lower().endswith('.pdf')
 
-def pdf_to_images(pdf_bytes: bytes) -> list[tuple[bytes, str]]:
-    """Convert PDF pages to PNG images using PyMuPDF."""
-    import fitz
-    import io
-    
-    images = []
-    pdf_doc = fitz.open(stream=pdf_bytes, filetype="pdf")
-    
-    for page_num in range(len(pdf_doc)):
-        page = pdf_doc[page_num]
-        pix = page.get_pixmap(dpi=150)
-        img_bytes = pix.tobytes("png")
-        images.append((img_bytes, "image/png"))
-    
-    pdf_doc.close()
-    return images
 
 if DEMO_MODE:
     st.session_state.analysis_result = get_demo_result()
@@ -953,21 +937,16 @@ if not st.session_state.analysis_complete:
             
             def run_analysis():
                 try:
-                    from gemini_analyzer import analyze_contract_images
+                    from gemini_analyzer import analyze_contract_files
                     
-                    image_data_list = []
+                    file_data_list = []
                     for uf in uploaded_files:
                         uf.seek(0)
                         file_bytes = uf.read()
-                        
-                        if is_pdf(uf.name):
-                            pdf_images = pdf_to_images(file_bytes)
-                            image_data_list.extend(pdf_images)
-                        else:
-                            mime_type = get_mime_type(uf.name)
-                            image_data_list.append((file_bytes, mime_type))
+                        mime_type = get_mime_type(uf.name)
+                        file_data_list.append((file_bytes, mime_type))
                     
-                    result = analyze_contract_images(image_data_list)
+                    result = analyze_contract_files(file_data_list)
                     analysis_result["result"] = result
                 except Exception as e:
                     analysis_result["error"] = str(e)
@@ -1017,37 +996,20 @@ if not st.session_state.analysis_complete:
         
         import base64
         from io import BytesIO
-        import fitz
         
-        total_pages = 0
-        for uf in uploaded_files:
-            if is_pdf(uf.name):
-                uf.seek(0)
-                pdf_doc = fitz.open(stream=uf.read(), filetype="pdf")
-                total_pages += len(pdf_doc)
-                pdf_doc.close()
-            else:
-                total_pages += 1
+        total_files = len(uploaded_files)
         
-        st.markdown(f'<p style="text-align:center; color: var(--text-secondary); margin-bottom: 0.75rem; font-size: 0.875rem;">📄 총 {total_pages}장 선택됨</p>', unsafe_allow_html=True)
+        st.markdown(f'<p style="text-align:center; color: var(--text-secondary); margin-bottom: 0.75rem; font-size: 0.875rem;">📄 총 {total_files}개 파일 선택됨</p>', unsafe_allow_html=True)
         
         preview_html = '<div class="preview-grid">'
         for idx, uf in enumerate(uploaded_files):
             if is_pdf(uf.name):
-                uf.seek(0)
-                pdf_bytes = uf.read()
-                pdf_doc = fitz.open(stream=pdf_bytes, filetype="pdf")
-                for page_num in range(len(pdf_doc)):
-                    page = pdf_doc[page_num]
-                    pix = page.get_pixmap(dpi=72)
-                    img_bytes = pix.tobytes("png")
-                    img = Image.open(BytesIO(img_bytes))
-                    img.thumbnail((160, 160))
-                    buffered = BytesIO()
-                    img.save(buffered, format="PNG")
-                    img_base64 = base64.b64encode(buffered.getvalue()).decode()
-                    preview_html += f'<div class="preview-item"><div class="uploaded-preview"><img src="data:image/png;base64,{img_base64}" /></div></div>'
-                pdf_doc.close()
+                preview_html += f'''<div class="preview-item">
+                    <div class="uploaded-preview" style="display: flex; flex-direction: column; align-items: center; justify-content: center; background: #FEF3C7;">
+                        <div style="font-size: 3rem;">📄</div>
+                        <div style="font-size: 0.75rem; color: #92400E; margin-top: 0.5rem; text-align: center; word-break: break-all; padding: 0 0.5rem;">{uf.name[:20]}{"..." if len(uf.name) > 20 else ""}</div>
+                    </div>
+                </div>'''
             else:
                 uf.seek(0)
                 img = Image.open(uf)
