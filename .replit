@@ -59,10 +59,6 @@ externalPort = 4200
 localPort = 41843
 externalPort = 3001
 
-[[ports]]
-localPort = 43687
-externalPort = 5173
-
 [deployment]
 deploymentTarget = "autoscale"
 run = ["streamlit", "run", "app.py", "--server.port=5000", "--server.address=0.0.0.0", "--server.headless=true"]

@@ -1092,6 +1092,67 @@ if not st.session_state.analysis_complete:
 else:
     result = st.session_state.analysis_result
     
+    st.markdown("""
+    <style>
+        .result-navbar {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+            margin-bottom: 1.5rem;
+            max-width: 720px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .nav-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border: 1px solid #E4E4E7;
+            border-radius: 8px;
+            background: #FAFAFA;
+            color: #52525B;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            text-decoration: none;
+        }
+        .nav-btn:hover {
+            background: #F4F4F5;
+            border-color: #D4D4D8;
+        }
+        .nav-title {
+            flex: 1;
+            text-align: center;
+            font-size: 0.875rem;
+            color: #71717A;
+        }
+    </style>
+    """, unsafe_allow_html=True)
+    
+    col1, col2, col3 = st.columns([1, 2, 1])
+    with col1:
+        if st.button("← 뒤로가기", key="back_btn", use_container_width=True):
+            st.session_state.analysis_complete = False
+            st.session_state.analysis_result = None
+            st.rerun()
+    with col2:
+        st.markdown('<p style="text-align: center; color: #71717A; margin: 0.5rem 0;">📊 분석 결과</p>', unsafe_allow_html=True)
+    with col3:
+        if st.button("🏠 홈으로", key="home_btn", use_container_width=True):
+            st.session_state.analysis_complete = False
+            st.session_state.analysis_result = None
+            reset_manifest()
+            st.session_state.uploader_key += 1
+            st.rerun()
+    
+    st.markdown("<hr style='border: none; border-top: 1px solid #E4E4E7; margin: 1rem 0;'>", unsafe_allow_html=True)
+    
     if result.summary:
         st.markdown(f"""
         <div class="summary-section">
