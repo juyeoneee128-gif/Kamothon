@@ -863,7 +863,6 @@ st.markdown("""
         <div class="brand-icon">📋</div>
         <div class="brand-title">계약서 리스크 하이라이터</div>
     </div>
-    <div class="brand-subtitle">계약서 속 위험 조항, 한 번에 발견하고 바로 대응하세요 😊</div>
 </div>
 <div class="header-spacer"></div>
 """, unsafe_allow_html=True)
@@ -937,9 +936,10 @@ if not st.session_state.analysis_complete:
     
     if not has_files:
         st.markdown("""
-        <div class="privacy-banner">
-            <span class="privacy-banner-icon">🔒</span>
-            <span>개인 정보는 자동 마스킹됩니다.</span>
+        <div class="privacy-banner" style="flex-direction: column; align-items: center; gap: 0.5rem; text-align: center;">
+            <span>계약서 속 위험 조항, 한 번에 발견하고 바로 대응하세요 😊</span>
+            <span>🔒 개인 정보는 자동 마스킹됩니다.</span>
+            <span>📖 어려운 법률 용어들, 쉽게 이해 가능하도록 풀어 설명해드릴게요!</span>
         </div>
         """, unsafe_allow_html=True)
     
