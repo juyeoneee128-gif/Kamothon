@@ -7,6 +7,60 @@ from pydantic import BaseModel
 
 DEMO_MODE = False
 
+# [백엔드 삽입용] 5대 법령 강행규정 위반 탐지 데이터셋
+# 이 리스트는 AI가 분석할 때 '정답지'로 참고합니다.
+MANDATORY_RISK_CLAUSES = [
+    # 1. 근로기준법 제20조 (위약금 예정 금지) - 절대 무효
+    {
+        "clause_id": "mandatory_labor_01",
+        "category": "🚨 근로기준법 위반",
+        "risk_pattern": "퇴사 시 위약금, 손해배상액을 미리 금액으로 정해둠",
+        "legal_reference": "근로기준법 제20조 (위약 예정 금지)",
+        "explanation": "근로자가 갑자기 그만둔다고 해서 미리 정해진 벌금(위약금)을 내게 하는 건 불법입니다. 실제 발생한 손해만 청구할 수 있습니다.",
+        "script": "근로기준법 제20조에 의거, 근로계약 불이행에 대한 위약금 예정 약정은 무효입니다. 해당 조항 삭제를 요청합니다."
+    },
+
+    # 2. 근로기준법 제56조 (연장/야간/휴일근로 가산수당) - 50% 가산 필수
+    {
+        "clause_id": "mandatory_labor_02",
+        "category": "🚨 근로기준법 위반",
+        "risk_pattern": "연장근로, 야간근로, 휴일근로에 대한 가산수당(50%)이 없거나 통상임금만 지급",
+        "legal_reference": "근로기준법 제56조 (연장·야간 및 휴일 근로)",
+        "explanation": "야근, 밤 10시 이후 근무, 주말 근무를 할 때는 시급의 1.5배(50% 가산)를 받아야 합니다. 평일 시급만 주는 건 불법입니다.",
+        "script": "근로기준법 제56조에 따라 연장·야간·휴일근로 시 통상임금의 50%를 가산하여 지급해야 합니다. 가산수당 지급을 요청합니다."
+    },
+
+    # 3. 최저임금법 (최저임금 미달) - 형사처벌 대상
+    {
+        "clause_id": "mandatory_wage_01",
+        "category": "🚨 최저임금법 위반",
+        "risk_pattern": "시급 환산 시 법정 최저임금(2025년 10,030원)보다 낮음",
+        "legal_reference": "최저임금법 제6조 (최저임금의 효력)",
+        "explanation": "2025년 최저시급은 10,030원입니다. 월급을 근무시간으로 나눴을 때 이보다 낮으면 형사처벌 대상입니다.",
+        "script": "계약서상 급여를 시급으로 환산하면 최저임금법에 미달합니다. 2025년 최저시급 10,030원 기준으로 재계산하여 계약서 수정을 요청합니다."
+    },
+
+    # 4. 근로기준법 제54조 (휴게시간 미부여) - 의무 위반
+    {
+        "clause_id": "mandatory_labor_03",
+        "category": "🚨 근로기준법 위반",
+        "risk_pattern": "4시간 근무 시 30분, 8시간 근무 시 1시간의 휴게시간을 보장하지 않음",
+        "legal_reference": "근로기준법 제54조 (휴게)",
+        "explanation": "4시간 일하면 30분, 8시간 일하면 1시간 쉬는 시간을 의무적으로 줘야 합니다. '알아서 쉬라'는 식은 불법입니다.",
+        "script": "근로기준법 제54조에 따라 근로시간이 4시간인 경우 30분 이상, 8시간인 경우 1시간 이상의 휴게시간을 근로시간 도중에 부여해야 합니다."
+    },
+
+    # 5. 근로자퇴직급여보장법 (퇴직금 미지급) - 1년 이상 근무 시 필수
+    {
+        "clause_id": "mandatory_retirement_01",
+        "category": "🚨 근로자퇴직급여보장법 위반",
+        "risk_pattern": "퇴직금 없음, 퇴직금은 월급에 포함, 퇴직금 지급 안 함 등의 문구",
+        "legal_reference": "근로자퇴직급여보장법 제8조 (퇴직금제도의 설정)",
+        "explanation": "1년 이상, 주 15시간 이상 일하면 반드시 퇴직금을 받아야 합니다. '월급에 포함'이라는 말은 위법입니다.",
+        "script": "근로자퇴직급여보장법 제8조에 따라 계속근로기간 1년에 대하여 30일분 이상의 평균임금을 퇴직금으로 지급해야 합니다. 퇴직금 조항 추가를 요청합니다."
+    }
+]
+
 class RiskClause(BaseModel):
     clause_id: str
     original_text: str
@@ -144,7 +198,19 @@ def analyze_contract_image(image_bytes: bytes, mime_type: str = "image/jpeg") ->
     
     client = genai.Client(api_key=api_key)
     
-    system_prompt = """당신은 한국 근로기준법 전문가이자 계약서 분석 AI입니다.
+    # 강행규정 데이터셋을 문자열로 포맷팅
+    mandatory_ref = "\n".join([
+        f"{i+1}. {clause['legal_reference']} - {clause['risk_pattern']}"
+        for i, clause in enumerate(MANDATORY_RISK_CLAUSES)
+    ])
+
+    system_prompt = f"""당신은 한국 근로기준법 전문가이자 계약서 분석 AI입니다.
+
+**🎯 [필독] 강행규정 절대 기준 데이터셋**
+아래 5대 법령 강행규정을 '정답지'로 삼아 계약서를 분석하세요.
+이 항목들은 어떤 경우에도 위반되어서는 안 되는 **절대적 기준**입니다:
+
+{mandatory_ref}
 
 **작업 1: 텍스트 추출 (OCR)**
 계약서 이미지에서 모든 텍스트를 정확히 추출하세요.
@@ -152,6 +218,7 @@ def analyze_contract_image(image_bytes: bytes, mime_type: str = "image/jpeg") ->
 
 **작업 2: 위험 조항 분석**
 추출된 텍스트에서 근로자에게 불리한 조항을 찾으세요.
+위 **강행규정 데이터셋**의 risk_pattern과 일치하는 내용이 있는지 **최우선으로 확인**하세요.
 
 🚨 **[5대 핵심 체크리스트 - 최우선 검증 항목]**
 반드시 아래 항목을 먼저 확인하고, 해당 사항이 있으면 **"high" 위험도**로 분류하세요:
@@ -270,8 +337,20 @@ def analyze_contract_images(image_data_list: list[tuple[bytes, str]]) -> Optiona
         raise EnvironmentError("GEMINI_API_KEY 환경 변수가 설정되지 않았습니다.")
     
     client = genai.Client(api_key=api_key)
-    
-    system_prompt = """당신은 한국 근로기준법 전문가이자 계약서 분석 AI입니다.
+
+    # 강행규정 데이터셋을 문자열로 포맷팅
+    mandatory_ref = "\n".join([
+        f"{i+1}. {clause['legal_reference']} - {clause['risk_pattern']}"
+        for i, clause in enumerate(MANDATORY_RISK_CLAUSES)
+    ])
+
+    system_prompt = f"""당신은 한국 근로기준법 전문가이자 계약서 분석 AI입니다.
+
+**🎯 [필독] 강행규정 절대 기준 데이터셋**
+아래 5대 법령 강행규정을 '정답지'로 삼아 계약서를 분석하세요.
+이 항목들은 어떤 경우에도 위반되어서는 안 되는 **절대적 기준**입니다:
+
+{mandatory_ref}
 
 **작업 1: 텍스트 추출 (OCR)**
 여러 장의 계약서 이미지가 제공됩니다. 모든 페이지에서 텍스트를 정확히 추출하고 하나로 합쳐주세요.
@@ -279,6 +358,7 @@ def analyze_contract_images(image_data_list: list[tuple[bytes, str]]) -> Optiona
 
 **작업 2: 위험 조항 분석**
 추출된 텍스트에서 근로자에게 불리한 조항을 찾으세요.
+위 **강행규정 데이터셋**의 risk_pattern과 일치하는 내용이 있는지 **최우선으로 확인**하세요.
 
 🚨 **[5대 핵심 체크리스트 - 최우선 검증 항목]**
 반드시 아래 항목을 먼저 확인하고, 해당 사항이 있으면 **"high" 위험도**로 분류하세요:
