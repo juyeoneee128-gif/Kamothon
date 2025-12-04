@@ -904,15 +904,39 @@ if not st.session_state.analysis_complete:
             file_desc_parts.append(f"PDF {pdf_count}개")
         file_desc = ", ".join(file_desc_parts)
         
-        st.markdown(f'<p style="text-align:center; color: var(--text-secondary); margin-bottom: 0.75rem; font-size: 0.875rem;">📄 {file_desc} 선택됨</p>', unsafe_allow_html=True)
-        
         import base64
         from io import BytesIO
+        import fitz
+        
+        total_pages = 0
+        for uf in uploaded_files:
+            if is_pdf(uf.name):
+                uf.seek(0)
+                pdf_doc = fitz.open(stream=uf.read(), filetype="pdf")
+                total_pages += len(pdf_doc)
+                pdf_doc.close()
+            else:
+                total_pages += 1
+        
+        st.markdown(f'<p style="text-align:center; color: var(--text-secondary); margin-bottom: 0.75rem; font-size: 0.875rem;">📄 총 {total_pages}장 선택됨</p>', unsafe_allow_html=True)
         
         preview_html = '<div class="preview-grid">'
         for idx, uf in enumerate(uploaded_files):
             if is_pdf(uf.name):
-                preview_html += '<div class="preview-item"><div class="uploaded-preview"><div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; color: var(--text-secondary);"><span style="font-size:1.5rem;">📑</span></div></div></div>'
+                uf.seek(0)
+                pdf_bytes = uf.read()
+                pdf_doc = fitz.open(stream=pdf_bytes, filetype="pdf")
+                for page_num in range(len(pdf_doc)):
+                    page = pdf_doc[page_num]
+                    pix = page.get_pixmap(dpi=72)
+                    img_bytes = pix.tobytes("png")
+                    img = Image.open(BytesIO(img_bytes))
+                    img.thumbnail((160, 160))
+                    buffered = BytesIO()
+                    img.save(buffered, format="PNG")
+                    img_base64 = base64.b64encode(buffered.getvalue()).decode()
+                    preview_html += f'<div class="preview-item"><div class="uploaded-preview"><img src="data:image/png;base64,{img_base64}" /></div></div>'
+                pdf_doc.close()
             else:
                 uf.seek(0)
                 img = Image.open(uf)
