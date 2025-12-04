@@ -284,9 +284,9 @@ st.markdown("""
         background: var(--bg-card);
         border: 1px solid var(--border-color);
         border-radius: var(--radius-md);
-        padding: 14px 16px;
-        width: 320px;
-        max-width: 320px;
+        padding: 12px 14px;
+        width: max-content;
+        max-width: 240px;
         box-shadow: var(--shadow-lg);
         z-index: 1000;
         opacity: 0;
@@ -321,51 +321,25 @@ st.markdown("""
         align-items: center;
         gap: 6px;
         font-weight: 600;
-        font-size: 0.85rem;
+        font-size: 0.8rem;
         color: var(--text-primary);
-        margin-bottom: 12px;
-        padding-bottom: 10px;
-        border-bottom: 1px solid var(--border-color);
+        margin-bottom: 6px;
     }
     
-    .tooltip-section {
-        margin-bottom: 12px;
-    }
-    
-    .tooltip-section:last-child {
-        margin-bottom: 0;
-    }
-    
-    .tooltip-section-title {
-        display: block;
-        font-size: 0.7rem;
-        font-weight: 600;
-        color: var(--text-tertiary);
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        margin-bottom: 4px;
-    }
-    
-    .tooltip-section-content {
+    .tooltip-content {
         display: block;
         font-size: 0.8rem;
         color: var(--text-secondary);
         line-height: 1.5;
     }
     
-    .tooltip-issue {
-        background: var(--accent-yellow);
-        padding: 8px 10px;
-        border-radius: var(--radius-sm);
-        color: var(--text-primary);
-    }
-    
-    .tooltip-script {
-        background: var(--text-primary);
-        color: white;
-        padding: 8px 10px;
-        border-radius: var(--radius-sm);
-        font-style: italic;
+    .tooltip-hint {
+        display: block;
+        font-size: 0.7rem;
+        color: var(--text-muted);
+        margin-top: 8px;
+        padding-top: 8px;
+        border-top: 1px solid var(--border-color);
     }
     
     /* ===== MODAL ===== */
@@ -907,14 +881,18 @@ else:
     if result.risk_clauses and len(result.risk_clauses) > 0:
         st.markdown("""
         <div class="instruction-hint">
-            색칠된 부분에 마우스를 올리면 상세 정보를 확인할 수 있어요
+            색칠된 부분에 마우스를 올리거나 클릭하면 상세 정보를 확인할 수 있어요
         </div>
         """, unsafe_allow_html=True)
     
-    from gemini_analyzer import highlight_text_with_risks
+    from gemini_analyzer import highlight_text_with_risks, generate_css_modals_html
     
     if result.extracted_text:
-        highlighted_html, _ = highlight_text_with_risks(result.extracted_text, result.risk_clauses)
+        highlighted_html, modal_data_list = highlight_text_with_risks(result.extracted_text, result.risk_clauses)
+        
+        if modal_data_list:
+            modals_html = generate_css_modals_html(modal_data_list)
+            st.markdown(modals_html, unsafe_allow_html=True)
         
         st.markdown(f"""
         <div class="document-viewer">
