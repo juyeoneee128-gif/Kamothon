@@ -1,4 +1,4 @@
-# 계약서 리스크 하이라이터 (Contract Risk Highlighter)
+# 계약 지키미 (Contract Risk Highlighter)
 
 ## Overview
 AI-based contract risk analysis service for young workers and part-time employees. Uses Gemini Vision LLM to identify risky clauses in employment contracts and provides communication scripts for negotiation.
@@ -113,6 +113,17 @@ ContractAnalysisResult:
 - **Layout**: Centered content (max-width 720px), wide margins
 
 ## Recent Changes
+- **2024-12-04**:
+  - **Chat Feature Removed**: Reverted chat functionality per user request
+  - **Analysis UX Improvement**: During analysis, only progress bar shown (file preview and buttons hidden)
+  - **Preview Grid UX Update**:
+    - "이미지 추가" button now appears as last item in preview grid
+    - X delete button overlays each preview item
+    - 3 items per row layout
+  - **Navigation Bar on Results Page**:
+    - Back button (뒤로가기) - keeps uploaded files
+    - Home button (홈으로) - resets everything
+
 - **2024-12-03**: 
   - **Modern Premium Design Overhaul**:
     - Clean, minimalist, professional style
