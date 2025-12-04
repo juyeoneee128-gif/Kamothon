@@ -402,6 +402,35 @@ st.markdown("""
         }
     }
     
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.5; }
+    }
+    
+    .loading-spinner {
+        display: inline-block;
+        width: 18px;
+        height: 18px;
+        border: 2px solid #E4E4E7;
+        border-top: 2px solid #FACC15;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        vertical-align: middle;
+        margin-right: 8px;
+    }
+    
+    .loading-text {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        animation: pulse 2s ease-in-out infinite;
+    }
+    
     .modal-header {
         padding: 1.25rem 1.5rem;
         border-bottom: 1px solid var(--border-color);
@@ -952,7 +981,7 @@ if not st.session_state.analysis_complete:
             while not analysis_done.is_set():
                 if msg_idx < len(progress_messages):
                     msg, progress = progress_messages[msg_idx]
-                    status_container.markdown(f'<p style="text-align:center; font-size:1rem; color: var(--text-secondary);">{msg}</p>', unsafe_allow_html=True)
+                    status_container.markdown(f'<div class="loading-text" style="text-align:center; font-size:1rem; color: var(--text-secondary);"><span class="loading-spinner"></span>{msg}</div>', unsafe_allow_html=True)
                     progress_bar.progress(progress)
                     msg_idx += 1
                 time.sleep(2.5)
