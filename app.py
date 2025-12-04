@@ -1046,7 +1046,10 @@ if not st.session_state.analysis_complete:
                     
             st.rerun()
         
-        else:
+        if is_analyzing:
+            st.stop()
+        
+        if not is_analyzing:
             manifest = st.session_state.file_manifest
             
             import base64
