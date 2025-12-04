@@ -20,6 +20,19 @@ except ImportError as e:
 
 DEMO_MODE = False
 
+CLEANING_RULES = """
+**[작업 1: 텍스트 추출 및 정제 (Text Cleaning)] - 중요!**
+계약서 이미지에서 텍스트를 추출할 때, 다음 '줄바꿈 처리 규칙'을 엄격하게 적용하여 문장을 자연스럽게 만드세요.
+
+1. **문장 연결 (Line Merge):**
+   - 문장이 문법적으로 끝나지 않았는데 줄바꿈 문자(\\n)가 있는 경우, 이를 삭제하고 **공백(띄어쓰기)으로 대체**하여 앞뒤 문장을 연결하세요.
+   - 예시: "근로자는 갑의 지시에\\n따라야 한다" -> "근로자는 갑의 지시에 따라야 한다"
+
+2. **구조 유지 (Structure Keep):**
+   - 문단이 바뀌거나, 조항이 구분되는 경우(예: 제1조, 1., 가. 등)에는 줄바꿈을 유지하세요.
+   - 표나 리스트 형태의 데이터는 구조가 깨지지 않도록 줄바꿈을 보존하세요.
+"""
+
 # [백엔드 삽입용] 6대 법령 강행규정 위반 탐지 데이터셋
 # 이 리스트는 AI가 분석할 때 '정답지'로 참고합니다.
 MANDATORY_RISK_CLAUSES = [
@@ -227,7 +240,13 @@ def analyze_contract_image(image_bytes: bytes, mime_type: str = "image/jpeg") ->
         for i, clause in enumerate(MANDATORY_RISK_CLAUSES)
     ])
 
-    system_prompt = f"""당신은 한국 근로기준법 전문가이자 계약서 분석 AI입니다.
+    system_prompt = f"""당신은 사회초년생을 위한 '친절하고 꼼꼼한 AI 법률 멘토, 하이라이터'입니다.
+입력된 계약서 이미지를 분석하여 법률적 위험 요소를 진단하고 조언을 제공하세요.
+
+---
+{CLEANING_RULES}
+
+---
 
 **🎯 [필독] 강행규정 절대 기준 데이터셋**
 아래 6대 법령 강행규정을 '정답지'로 삼아 계약서를 분석하세요.
@@ -372,7 +391,13 @@ def analyze_contract_images(image_data_list: list[tuple[bytes, str]]) -> Optiona
         for i, clause in enumerate(MANDATORY_RISK_CLAUSES)
     ])
 
-    system_prompt = f"""당신은 한국 근로기준법 전문가이자 계약서 분석 AI입니다.
+    system_prompt = f"""당신은 사회초년생을 위한 '친절하고 꼼꼼한 AI 법률 멘토, 하이라이터'입니다.
+입력된 계약서 이미지를 분석하여 법률적 위험 요소를 진단하고 조언을 제공하세요.
+
+---
+{CLEANING_RULES}
+
+---
 
 **🎯 [필독] 강행규정 절대 기준 데이터셋**
 아래 6대 법령 강행규정을 '정답지'로 삼아 계약서를 분석하세요.
