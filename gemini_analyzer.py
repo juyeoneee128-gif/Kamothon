@@ -586,11 +586,11 @@ def generate_css_modals_html(modal_data_list: list) -> str:
                 <div class="modal-section-content modal-original-text">"{data['original']}"</div>
             </div>
             <div class="modal-section">
-                <div class="modal-section-title">왜 문제가 될 수 있나요?</div>
+                <div class="modal-section-title">🔎 이 조항, 이런 의미예요!</div>
                 <div class="modal-section-content modal-issue-section">{data['explanation']}</div>
             </div>
             <div class="modal-section modal-script-section">
-                <div class="modal-section-title">💬 이렇게 말해보세요</div>
+                <div class="modal-section-title">✅ 이렇게 쓰셔야 안전해요</div>
                 <div class="modal-section-content modal-script">"{data['script']}"</div>
             </div>
             <div class="modal-section">
@@ -626,7 +626,7 @@ def generate_modals_html(modal_data_list: list) -> str:
                 <div class="modal-section-content modal-original-text">"{data['original']}"</div>
             </div>
             <div class="modal-section">
-                <div class="modal-section-title">💡 왜 문제가 될 수 있나요?</div>
+                <div class="modal-section-title">💡 🔎 이 조항, 이런 의미예요!</div>
                 <div class="modal-section-content">{data['explanation']}</div>
             </div>
             <div class="modal-section">
@@ -637,7 +637,7 @@ def generate_modals_html(modal_data_list: list) -> str:
                 </div>
             </div>
             <div class="modal-section">
-                <div class="modal-section-title">💬 이렇게 말해보세요</div>
+                <div class="modal-section-title">✅ 이렇게 쓰셔야 안전해요</div>
                 <div class="modal-section-content modal-script">"{data['script']}"</div>
             </div>
         </div>
@@ -724,7 +724,7 @@ def generate_annotation_cards(risk_clauses: list[RiskClause]) -> str:
 "{safe_original}"
 </div>
 <div class="annotation-section">
-<div class="annotation-label">💡 왜 문제가 될 수 있나요?</div>
+<div class="annotation-label">💡 🔎 이 조항, 이런 의미예요!</div>
 <div class="annotation-content">{safe_explanation}</div>
 </div>
 <div class="annotation-section">
@@ -735,7 +735,7 @@ def generate_annotation_cards(risk_clauses: list[RiskClause]) -> str:
 </div>
 </div>
 <div class="annotation-section">
-<div class="annotation-label">💬 이렇게 말해보세요</div>
+<div class="annotation-label">✅ 이렇게 쓰셔야 안전해요</div>
 <div class="annotation-script">"{safe_script}"</div>
 </div>
 </div>
