@@ -1160,13 +1160,6 @@ if not st.session_state.analysis_complete:
                                 <div class="uploaded-preview"><img src="data:image/png;base64,{img_base64}" /></div>
                             </div>
                             ''', unsafe_allow_html=True)
-                        
-                        if st.button("✕", key=f"del_{file_hash}", disabled=is_analyzing):
-                            del st.session_state.file_manifest[file_hash]
-                            if len(st.session_state.file_manifest) == 0:
-                                reset_manifest()
-                                st.session_state.uploader_key += 1
-                            st.rerun()
         
         st.markdown('<div style="text-align: center; margin-top: 1rem;">', unsafe_allow_html=True)
         if st.button("🗑️ 전체 삭제", key="cancel_all", disabled=is_analyzing):
