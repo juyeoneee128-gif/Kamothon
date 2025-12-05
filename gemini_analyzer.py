@@ -110,6 +110,96 @@ class ContractAnalysisResult(BaseModel):
     summary: str
 
 
+def anonymize_personal_info(text: str) -> str:
+    """
+    개인정보를 비식별화 처리하는 함수.
+
+    처리 항목:
+    - 주민등록번호: 000000-*******
+    - 전화번호: 010-****-0000
+    - 이메일: ab***@example.com
+    - 계좌번호: ****-****-****-1234
+    - 이름: 홍** (계약서 내 "근로자:", "성명:" 등 뒤에 나오는 한글 이름)
+    - 주소: 상세 주소 마스킹
+
+    Args:
+        text: 비식별화할 텍스트
+
+    Returns:
+        비식별화 처리된 텍스트
+    """
+    import re
+
+    if not text:
+        return text
+
+    # 1. 주민등록번호 마스킹: 000000-0000000 -> 000000-*******
+    text = re.sub(
+        r'(\d{6})-(\d{7})',
+        r'\1-*******',
+        text
+    )
+
+    # 2. 전화번호 마스킹
+    # 010-0000-0000 -> 010-****-0000
+    text = re.sub(
+        r'(010|011|016|017|018|019)-(\d{3,4})-(\d{4})',
+        lambda m: f"{m.group(1)}-{'*' * len(m.group(2))}-{m.group(3)}",
+        text
+    )
+
+    # 02, 031 등 지역번호 -> 0*-***-0000 형식
+    text = re.sub(
+        r'(0\d{1,2})-(\d{3,4})-(\d{4})',
+        lambda m: f"{m.group(1)[:2]}{'*' * (len(m.group(1)) - 2)}-{'*' * len(m.group(2))}-{m.group(3)}",
+        text
+    )
+
+    # 3. 이메일 마스킹: example@domain.com -> ex***@domain.com
+    text = re.sub(
+        r'([a-zA-Z0-9])([a-zA-Z0-9._%+-]{1,})@([a-zA-Z0-9.-]+\.[a-zA-Z]{2,})',
+        lambda m: f"{m.group(1)}{'*' * min(len(m.group(2)), 5)}@{m.group(3)}",
+        text
+    )
+
+    # 4. 계좌번호 마스킹 (10자리 이상 연속된 숫자, 단 전화번호나 주민번호가 아닌 경우)
+    # 하이픈으로 구분된 계좌번호: 1234-5678-9012-3456 -> ****-****-****-3456
+    text = re.sub(
+        r'(\d{3,4})-(\d{3,4})-(\d{3,4})-(\d{3,4})',
+        lambda m: f"{'*' * len(m.group(1))}-{'*' * len(m.group(2))}-{'*' * len(m.group(3))}-{m.group(4)}",
+        text
+    )
+
+    # 5. 이름 마스킹 (계약서 특정 키워드 뒤의 한글 이름)
+    # "근로자:", "성명:", "이름:", "대표:" 등 뒤에 나오는 2-4자 한글 이름
+    name_patterns = [
+        r'(근로자\s*[:：]\s*)([가-힣]{2,4})(?=\s|$|\()',
+        r'(성\s*명\s*[:：]\s*)([가-힣]{2,4})(?=\s|$|\()',
+        r'(이\s*름\s*[:：]\s*)([가-힣]{2,4})(?=\s|$|\()',
+        r'(대\s*표\s*[:：]\s*)([가-힣]{2,4})(?=\s|$|\()',
+        r'(사용자\s*[:：]\s*)([가-힣]{2,4})(?=\s|$|\()',
+        r'(성명\s*)([가-힣]{2,4})(?=\s|$|\()',
+    ]
+
+    for pattern in name_patterns:
+        text = re.sub(
+            pattern,
+            lambda m: f"{m.group(1)}{m.group(2)[0]}{'*' * (len(m.group(2)) - 1)}",
+            text
+        )
+
+    # 6. 주소 마스킹 (상세주소 부분을 마스킹)
+    # "서울시 강남구 테헤란로 123, 4층" -> "서울시 강남구 ********"
+    address_pattern = r'(서울|부산|대구|인천|광주|대전|울산|세종|경기|강원|충북|충남|전북|전남|경북|경남|제주)([시도])\s+([가-힣]+[시군구])\s+([가-힣0-9\s,.-]+)'
+    text = re.sub(
+        address_pattern,
+        lambda m: f"{m.group(1)}{m.group(2)} {m.group(3)} ********",
+        text
+    )
+
+    return text
+
+
 def get_demo_result() -> ContractAnalysisResult:
     """Return demo analysis result for testing without API calls."""
 
@@ -362,7 +452,16 @@ def analyze_contract_image(image_bytes: bytes, mime_type: str = "image/jpeg") ->
 
         if raw_json:
             data = json.loads(raw_json)
-            return ContractAnalysisResult(**data)
+            result = ContractAnalysisResult(**data)
+
+            # 개인정보 비식별화 처리
+            result.extracted_text = anonymize_personal_info(result.extracted_text)
+            for clause in result.risk_clauses:
+                clause.original_text = anonymize_personal_info(clause.original_text)
+                clause.explanation = anonymize_personal_info(clause.explanation)
+                clause.script = anonymize_personal_info(clause.script)
+
+            return result
         else:
             return None
 
@@ -561,7 +660,16 @@ def analyze_contract_images(image_data_list: list[tuple[bytes, str]]) -> Optiona
 
         if raw_json:
             data = json.loads(raw_json)
-            return ContractAnalysisResult(**data)
+            result = ContractAnalysisResult(**data)
+
+            # 개인정보 비식별화 처리
+            result.extracted_text = anonymize_personal_info(result.extracted_text)
+            for clause in result.risk_clauses:
+                clause.original_text = anonymize_personal_info(clause.original_text)
+                clause.explanation = anonymize_personal_info(clause.explanation)
+                clause.script = anonymize_personal_info(clause.script)
+
+            return result
         else:
             return None
 
@@ -649,7 +757,7 @@ def analyze_contract_files(file_data_list: list[tuple[bytes, str]]) -> Optional[
         
         file_count = len(file_data_list)
         contents.append(system_prompt + f"\n\n위 {file_count}개의 계약서 파일을 분석해주세요.")
-        
+
         response = client.models.generate_content(
             model="gemini-2.5-pro",
             contents=contents,
@@ -658,16 +766,25 @@ def analyze_contract_files(file_data_list: list[tuple[bytes, str]]) -> Optional[
                 response_schema=ContractAnalysisResult,
             ),
         )
-        
+
         raw_json = response.text
         logging.info(f"Gemini response: {raw_json}")
-        
+
         if raw_json:
             data = json.loads(raw_json)
-            return ContractAnalysisResult(**data)
+            result = ContractAnalysisResult(**data)
+
+            # 개인정보 비식별화 처리
+            result.extracted_text = anonymize_personal_info(result.extracted_text)
+            for clause in result.risk_clauses:
+                clause.original_text = anonymize_personal_info(clause.original_text)
+                clause.explanation = anonymize_personal_info(clause.explanation)
+                clause.script = anonymize_personal_info(clause.script)
+
+            return result
         else:
             return None
-            
+
     except Exception as e:
         logging.error(f"Contract analysis failed: {e}")
         raise Exception(f"계약서 분석 중 오류가 발생했습니다: {e}")
