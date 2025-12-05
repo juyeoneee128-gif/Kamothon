@@ -1266,13 +1266,13 @@ else:
         st.info("텍스트를 추출하지 못했습니다.")
     
     if not result.risk_clauses or len(result.risk_clauses) == 0:
-        st.markdown("""
-        <div class="no-risks-banner">
-            <strong>🎉 좋은 소식이에요!</strong><br>
-            특별히 위험해 보이는 조항이 발견되지 않았어요.<br>
-            그래도 서명 전에 모든 내용을 꼼꼼히 읽어보세요!
-        </div>
-        """, unsafe_allow_html=True)
+        st.balloons()
+        st.success("""
+👏 **축하합니다! 독소 조항이 발견되지 않았어요.**
+
+이 계약서는 15대 강행규정을 준수하고 있는 것으로 보입니다.
+안심하고 서명하셔도 좋아요! (단, 직무별 특약 사항은 꼼꼼히 확인하세요.)
+        """)
     
     if result.missing_clauses and len(result.missing_clauses) > 0:
         missing_items = "".join([f'<div class="missing-item">{clause}</div>' for clause in result.missing_clauses])
